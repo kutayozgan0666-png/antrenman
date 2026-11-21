@@ -1,0 +1,1390 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f1115">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Kalça Dostu Antrenman</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+  /* Tek ekranlık koyu uygulama: üstte ilerleme, ortada hareket, altta büyük butonlar */
+  :root{
+    --bg:#0f1115; --card:#1a1d24; --card2:#262a34; --line:#333846;
+    --text:#f2f4f8; --muted:#9aa3b2; --soft:#d5dae3;
+    --go:#3ddc97; --go-ink:#06281a; --go-bg:#123326;
+    --blue:#4da3ff; --blue-ink:#04182e; --blue-bg:#132640;
+    --warn:#ffb547; --red:#ff6b6b; --red-bg:#3a1717;
+    --shade:rgba(5,7,10,.78);
+    --fig:#e9edf5; --fig2:#7d8698; --prop:#8a93a6; --water:rgba(77,163,255,.18);
+    color-scheme:dark;
+    padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  [hidden]{display:none!important}
+  html{height:100%}
+  html,body{margin:0;background:var(--bg);color:var(--text);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+  body{min-height:100%;display:flex;flex-direction:column;padding-block:12px 16px;
+    padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px))}
+  button{font:inherit;color:inherit;border:0;border-radius:18px;cursor:pointer;touch-action:manipulation}
+  button:active{transform:scale(.98);filter:brightness(1.1)}
+  .screen{display:none;flex:1;flex-direction:column;width:100%;max-width:560px;margin:0 auto}
+  .screen.active{display:flex}
+
+  /* Gün seçimi */
+  .apptitle{font-size:2rem;font-weight:900;margin:8px 0 4px}
+  .sub{color:var(--muted);margin:0 0 18px;font-size:1.05rem}
+  .daycard{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);
+    padding:20px;margin-bottom:14px;border-radius:22px}
+  .daycard .dnum{color:var(--go);font-weight:800;font-size:1rem;letter-spacing:.04em;text-transform:uppercase}
+  .daycard .dname{font-size:1.6rem;font-weight:800;margin:4px 0 6px}
+  .daycard .dmeta{color:var(--muted);font-size:1rem}
+  .resume{background:#13261d;border-color:#1f5a3e}
+  .resume .dnum{color:var(--warn)}
+  .warn{background:#2b2111;border:1px solid #5a4318;color:#ffd79a;border-radius:16px;padding:14px 16px;
+    font-size:1rem;line-height:1.45;margin:6px 0 16px}
+  .settings{display:flex;gap:10px;margin-top:auto;padding-top:8px}
+  .toggle{flex:1;min-height:56px;background:var(--card2);font-weight:700;font-size:1rem}
+  .toggle.off{opacity:.55;text-decoration:line-through}
+
+  /* Antrenman üst bilgi */
+  .top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .icon{width:52px;height:52px;flex:0 0 52px;background:var(--card2);font-size:1.4rem;font-weight:800;border-radius:16px}
+  .topmid{flex:1;min-width:0}
+  .counter{font-size:1.25rem;font-weight:800}
+  .bar{height:8px;background:var(--card2);border-radius:99px;overflow:hidden;margin-top:6px}
+  .bar i{display:block;height:100%;width:0;background:var(--go);transition:width .3s}
+  .elapsed{font-variant-numeric:tabular-nums;color:var(--muted);font-weight:700;font-size:1.1rem;text-align:right;min-width:64px}
+
+  .panel{display:flex;flex-direction:column;flex:1}
+  .tags{display:flex;gap:8px;flex-wrap:wrap}
+  .tag{background:var(--card2);color:var(--soft);padding:7px 12px;border-radius:99px;font-weight:700;font-size:.95rem}
+  .tag.round{background:#1d2c45;color:#9cc8ff}
+  .exname{font-size:clamp(1.7rem,7.5vw,2.6rem);line-height:1.1;margin:10px 0 4px;font-weight:900}
+  .exvalue{font-size:clamp(2.6rem,13vw,4.8rem);font-weight:900;color:var(--go);font-variant-numeric:tabular-nums;line-height:1;margin:2px 0 10px}
+
+  .exsets{color:var(--soft);font-weight:800;font-size:1.05rem;margin:-4px 0 10px}
+
+  /* Günün planı */
+  .daymeta{color:var(--muted);font-size:.95rem;margin-top:2px}
+  .plan{display:flex;flex-direction:column;gap:12px;margin-bottom:16px}
+  .pblock{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+  .pblock h3{margin:0 0 2px;font-size:1.1rem}
+  .pblock .pnote{color:var(--muted);font-size:.9rem;line-height:1.4;margin:0 0 6px}
+  .prow{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:8px 0;border-top:1px solid var(--line);font-size:1rem}
+  .prow:first-of-type{border-top:0}
+  .prow b{font-weight:700;min-width:0}
+  .prow span{color:var(--go);font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums}
+
+  /* Gömülü video */
+  .dlgbox{max-height:100%;overflow:auto}
+  .vvideo{position:relative;width:100%;max-width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:var(--bg)}
+  .vvideo iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+  .viewer.vid #vStage,.viewer.vid #vDots,.viewer.vid #vCap,.viewer.vid .row{display:none}
+
+  /* Hareket çizimleri */
+  .pics{display:grid;grid-template-columns:repeat(var(--n,3),minmax(0,1fr));gap:8px;margin:0 0 10px}
+  .pic{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:3px 3px 6px;display:flex;flex-direction:column;gap:3px;min-width:0;text-align:left}
+  .pic span{font-size:.72rem;line-height:1.2;color:var(--muted);font-weight:700;padding:0 3px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .pics.mini{margin:10px 0 0}
+  .pics.mini .pic{padding:2px}
+  .fig{display:block;width:100%;height:auto}
+  .fig .ln,.fig .lf,.fig .tr,.fig .pr,.fig .acc,.fig .band{fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .fig .ln{stroke:var(--fig);stroke-width:3.2}
+  .fig .lf{stroke:var(--fig2);stroke-width:3.2}
+  .fig .tr{stroke:var(--fig);stroke-width:3.8}
+  .fig .hd{fill:var(--fig)}
+  .fig .floor{stroke:var(--line);stroke-width:1.5}
+  .fig .pr{stroke:var(--prop);stroke-width:2}
+  .fig .pr.thin{stroke-width:1.2}
+  .fig .pr.thick{stroke-width:3}
+  .fig .prf{fill:var(--card2);stroke:var(--prop);stroke-width:1.5}
+  .fig .band{stroke:var(--warn);stroke-width:2.2}
+  .fig .acc{stroke:var(--go);stroke-width:1.8}
+  .fig .dash{stroke-dasharray:3 2.5}
+  .fig .water{fill:var(--water);stroke:var(--blue);stroke-width:1}
+  .viewer .vhead{display:flex;align-items:center;gap:12px}
+  .viewer .vhead b{flex:1;font-size:1.3rem;min-width:0}
+  .vstage{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:6px}
+  .vcap{font-size:1.15rem;font-weight:800;text-align:center;min-height:1.5em}
+  .vdesc{margin:0;color:var(--soft);font-size:1rem;line-height:1.45}
+  .vdots{display:flex;justify-content:center;gap:6px}
+  .vdots i{width:9px;height:9px;border-radius:50%;background:var(--card2)}
+  .vdots i.on{background:var(--go)}
+  .exvalue.running{color:var(--blue)}
+  .exvalue.paused{color:var(--warn)}
+  .desc{font-size:1.05rem;line-height:1.45;color:var(--soft);margin:2px 0 10px}
+  .yt{display:block;padding:12px;border-radius:14px;background:#2a1515;border:1px solid #522323;color:#ff8a8a;
+    text-decoration:none;font-weight:800;text-align:center;font-size:1rem}
+  .spacer{flex:1;min-height:16px}
+  .actions{display:flex;flex-direction:column;gap:12px}
+  .big{width:100%;min-height:68px;font-size:1.7rem;font-weight:900;border-radius:22px}
+  .done{background:var(--go);color:var(--go-ink)}
+  .start{background:var(--blue);color:var(--blue-ink)}
+  .start.pause{background:var(--warn);color:#2b1a00}
+  .row{display:flex;gap:12px}
+  .small{flex:1;min-height:58px;background:var(--card2);font-size:1.05rem;font-weight:700}
+
+  /* Dinlenme */
+  .restpanel{align-items:center;text-align:center;justify-content:center}
+  .restlabel{font-size:1.6rem;font-weight:900;letter-spacing:.2em;color:var(--blue)}
+  .restnum{font-size:clamp(6rem,30vw,11rem);font-weight:900;line-height:1;font-variant-numeric:tabular-nums;margin:10px 0 24px}
+  .restnum.last{color:var(--warn)}
+  .restpanel .row{width:100%}
+  .mid{flex:1;min-height:84px;font-size:1.6rem;font-weight:900;background:var(--card2)}
+  .mid.primary{background:var(--blue);color:var(--blue-ink)}
+  .next{margin-top:26px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;width:100%}
+  .next span{display:block;color:var(--muted);font-weight:700;font-size:.95rem;text-transform:uppercase;letter-spacing:.06em}
+  .next b{display:block;font-size:1.5rem;margin:6px 0 2px}
+  .next em{font-style:normal;color:var(--go);font-weight:800;font-size:1.2rem}
+
+  /* Bitiş */
+  .fin h1{font-size:2.1rem;margin:10px 0 4px}
+  .total{font-size:clamp(3rem,15vw,4.8rem);font-weight:900;color:var(--go);font-variant-numeric:tabular-nums;margin:6px 0}
+  .stats{color:var(--soft);font-size:1.1rem;margin-bottom:18px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+  label{display:flex;flex-direction:column;gap:6px;color:var(--muted);font-weight:700;font-size:.95rem}
+  input,select,textarea{font:inherit;color:var(--text);background:var(--card);border:1px solid var(--line);
+    border-radius:14px;padding:14px;font-size:1.15rem;width:100%}
+  textarea{resize:vertical}
+  #summary{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.95rem;line-height:1.45;min-height:200px;margin:6px 0 12px}
+  .hint{color:var(--muted);font-size:.95rem;margin:4px 0 14px}
+  /* Zorluk puanı */
+  .rate{display:flex;flex-direction:column;gap:8px;margin-top:14px;width:100%}
+  .rate .q{color:var(--muted);font-weight:700;font-size:.95rem;text-align:left}
+  .rate .opts{display:flex;gap:10px}
+  .rbtn{flex:1;min-height:52px;background:var(--card2);border:2px solid transparent;font-size:1.15rem;font-weight:800}
+  .rbtn[data-v="kolay"].on{background:var(--go-bg);border-color:var(--go);color:var(--go)}
+  .rbtn[data-v="uygun"].on{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
+  .rbtn[data-v="zor"].on{background:var(--red-bg);border-color:var(--red);color:var(--red)}
+  .ratesum{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+  .rs{background:var(--card);border:1px solid var(--line);border-left-width:6px;border-radius:14px;padding:12px 14px}
+  .rs b{display:block;font-size:1.05rem;margin-bottom:4px}
+  .rs div{color:var(--soft);font-size:1rem;line-height:1.45}
+  .rs.kolay{border-left-color:var(--go)} .rs.kolay b{color:var(--go)}
+  .rs.uygun{border-left-color:var(--blue)} .rs.uygun b{color:var(--blue)}
+  .rs.zor{border-left-color:var(--red)} .rs.zor b{color:var(--red)}
+  .rs.yok{border-left-color:var(--muted)} .rs.yok b{color:var(--muted)}
+  .sectitle{font-size:1.2rem;font-weight:800;margin:4px 0 10px}
+
+  /* Çıkış onayı */
+  .dlg{position:fixed;inset:0;background:var(--shade);display:flex;align-items:flex-end;z-index:8;
+    padding:16px max(16px, env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 16px) max(16px, env(safe-area-inset-left,0px))}
+  .dlgbox{width:100%;max-width:560px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:24px;
+    padding:20px;display:flex;flex-direction:column;gap:12px}
+  .dlgbox .dlgtitle{font-size:1.5rem;font-weight:900}
+  .dlgbox p{margin:0;color:var(--soft);font-size:1.05rem;line-height:1.45}
+
+  .toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 24px);transform:translateX(-50%);
+    background:var(--go);color:var(--go-ink);padding:12px 20px;border-radius:99px;font-weight:800;z-index:9}
+</style>
+</head>
+<body>
+
+<!-- 1) GÜN SEÇİMİ -->
+<section id="scrSelect" class="screen active">
+  <div class="apptitle">Antrenman</div>
+  <p class="sub">Bugün hangi gün?</p>
+  <div class="warn">⚠️ Kalçada ağrı artarsa (4/10 üzeri ya da keskin ağrı) hareketi bırak, gerekirse antrenmanı durdur ve doktoruna danış.</div>
+  <div id="resumeBox"></div>
+  <div id="dayList"></div>
+  <div class="settings">
+    <button id="tglSound" class="toggle">🔊 Ses</button>
+    <button id="tglVib" class="toggle">📳 Titreşim</button>
+    <button id="btnTest" class="toggle">Test</button>
+  </div>
+</section>
+
+<!-- 1b) GÜNÜN PLANI -->
+<section id="scrDay" class="screen">
+  <header class="top">
+    <button id="btnDayBack" class="icon" aria-label="Gün seçimine dön">◀</button>
+    <div class="topmid">
+      <div id="dayTitle" class="counter"></div>
+      <div id="dayMeta" class="daymeta"></div>
+    </div>
+  </header>
+  <div id="dayPlan" class="plan"></div>
+  <div class="spacer"></div>
+  <button id="btnDayStart" class="big done">Antrenmanı başlat</button>
+</section>
+
+<!-- 2) ANTRENMAN -->
+<section id="scrWorkout" class="screen">
+  <header class="top">
+    <button id="btnExit" class="icon" aria-label="Antrenmanı bitir">✕</button>
+    <div class="topmid">
+      <div id="counter" class="counter">Hareket 1 / 1</div>
+      <div class="bar"><i id="bar"></i></div>
+    </div>
+    <div id="elapsed" class="elapsed">0:00</div>
+  </header>
+
+  <div id="exPanel" class="panel">
+    <div class="tags"><span id="exBlock" class="tag"></span><span id="exRound" class="tag round"></span></div>
+    <h1 id="exName" class="exname"></h1>
+    <div id="exValue" class="exvalue"></div>
+    <div id="exSets" class="exsets"></div>
+    <div id="exPics" class="pics"></div>
+    <p id="exDesc" class="desc"></p>
+    <a id="exYt" class="yt" target="_blank" rel="noopener">▶ Anlamadıysan videoyu aç (YouTube)</a>
+    <div id="exRate" class="rate">
+      <div class="q">Bu hareket nasıldı?</div>
+      <div class="opts">
+        <button class="rbtn" data-v="kolay">Kolay</button>
+        <button class="rbtn" data-v="uygun">Uygun</button>
+        <button class="rbtn" data-v="zor">Zor</button>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <div class="actions">
+      <button id="btnStart" class="big start">Başla</button>
+      <button id="btnDone" class="big done">Bitti ✓</button>
+      <div class="row">
+        <button id="btnPrev" class="small">◀ Önceki</button>
+        <button id="btnSkipEx" class="small">Hareketi geç ▶▶</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="restPanel" class="panel restpanel" hidden>
+    <div class="restlabel">DİNLENME</div>
+    <div id="restNum" class="restnum">0:30</div>
+    <div class="row">
+      <button id="btnAdd10" class="mid">+10 sn</button>
+      <button id="btnSkipRest" class="mid primary">Atla ▶</button>
+    </div>
+    <div class="next">
+      <span>Sıradaki</span>
+      <b id="nextName"></b>
+      <em id="nextValue"></em>
+      <div id="nextPics" class="pics mini"></div>
+    </div>
+    <div id="restRate" class="rate">
+      <div class="q">Az önceki hareket nasıldı? <span id="restRateName"></span></div>
+      <div class="opts">
+        <button class="rbtn" data-v="kolay">Kolay</button>
+        <button class="rbtn" data-v="uygun">Uygun</button>
+        <button class="rbtn" data-v="zor">Zor</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3) BİTİŞ -->
+<section id="scrFinish" class="screen fin">
+  <h1>Antrenman bitti 🎉</h1>
+  <div id="finDay" class="stats"></div>
+  <div id="finTotal" class="total">0:00</div>
+  <div id="finStats" class="stats"></div>
+
+  <div class="sectitle">Zorluk özeti</div>
+  <div id="finRate" class="ratesum"></div>
+
+  <div class="grid">
+    <label>Ağrı (0–10)
+      <select id="inPain">
+        <option value="">—</option>
+        <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+        <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+      </select>
+    </label>
+    <label>Kalori (saat)
+      <input id="inKcal" inputmode="numeric" placeholder="ör. 450">
+    </label>
+    <label>Ort. nabız
+      <input id="inAvg" inputmode="numeric" placeholder="ör. 118">
+    </label>
+    <label>Maks. nabız
+      <input id="inMax" inputmode="numeric" placeholder="ör. 150">
+    </label>
+  </div>
+  <label>Not
+    <input id="inNote" placeholder="Nasıl hissettin, kalça nasıldı?">
+  </label>
+
+  <p class="hint">Özeti kopyalayıp Claude'a yapıştır: günlüğe kaydeder ve bir sonraki antrenmanı Kolay / Uygun / Zor puanlarına göre günceller.</p>
+  <textarea id="summary" readonly></textarea>
+  <div class="actions">
+    <button id="btnCopy" class="big done">Özeti kopyala</button>
+    <div class="row">
+      <button id="btnShare" class="small">Paylaş</button>
+      <button id="btnHome" class="small">Ana ekran</button>
+    </div>
+  </div>
+</section>
+
+<div id="exitDlg" class="dlg" hidden>
+  <div class="dlgbox" role="dialog" aria-modal="true" aria-labelledby="exitTitle">
+    <div id="exitTitle" class="dlgtitle">Antrenmanı bitir?</div>
+    <p>Şimdi bitirirsen kalan hareketler özete "yapılmadı" olarak yazılır.</p>
+    <button id="btnExitYes" class="big done">Bitir ve özeti gör</button>
+    <button id="btnExitNo" class="small">Devam et</button>
+  </div>
+</div>
+
+<div id="picDlg" class="dlg" hidden>
+  <div class="dlgbox viewer" role="dialog" aria-modal="true" aria-labelledby="vName">
+    <div class="vhead"><b id="vName"></b><button id="vClose" class="icon" aria-label="Kapat">✕</button></div>
+    <div id="vVideo" class="vvideo" hidden></div>
+    <div id="vStage" class="vstage"></div>
+    <div id="vDots" class="vdots"></div>
+    <div id="vCap" class="vcap"></div>
+    <div class="row">
+      <button id="vPrev" class="small" aria-label="Önceki kare">◀</button>
+      <button id="vPlay" class="small">Duraklat</button>
+      <button id="vNext" class="small" aria-label="Sonraki kare">▶</button>
+    </div>
+    <p id="vDesc" class="vdesc"></p>
+    <a id="vYt" class="yt" target="_blank" rel="noopener">▶ Hâlâ anlamadıysan videoyu aç (YouTube)</a>
+  </div>
+</div>
+
+<div id="toast" class="toast" hidden></div>
+
+<script>
+/* ============================================================
+   PROGRAM — program.md ile aynı tutulmalı
+   R = tekrar/mesafe hareketi, T = süreli hareket (saniye)
+   sides: true → süreli hareketi sol/sağ olarak ikiye böler
+   auto: true  → harekete gelince sayaç kendiliğinden başlar
+   est: tahmini süre (sn), yalnızca toplam süre tahmini için
+   ============================================================ */
+const R = (n, v, d, q, o = {}) => ({ n, t: 'reps', v, d, q, ...o });
+const T = (n, sec, d, q, o = {}) => ({ n, t: 'time', v: sec, d, q, ...o });
+
+const EX = {
+  kediDeve: (v) => R('Kedi-deve', v, 'Dört ayak üstünde. Nefes verirken sırtını yukarı yuvarla, alırken göğsünü öne aç. Yavaş ve kontrollü.', 'cat cow egzersizi'),
+  pelvikTilt: R('Pelvik tilt', '12 tekrar', 'Sırtüstü, dizler bükülü. Karnını hafif sıkıp bel boşluğunu yere bastır, sonra bırak. Kalçayı yerden kaldırma.', 'pelvic tilt exercise'),
+  clam: (v) => R('Bantlı clamshell', v, 'Yan yat, dizler bükülü, bant dizlerin hemen üstünde. Topuklar birleşik kalsın, üstteki dizi aç-kapa. Leğen geriye devrilmesin.', 'clamshell exercise band'),
+  deadBug: (v) => R('Dead bug', v, 'Sırtüstü, kollar tavana, dizler 90°. Belini yere bastırırken karşı kol ve bacağı yavaşça uzat, geri getir. Bel yerden kalkmasın.', 'dead bug exercise'),
+  trxRow: R('TRX row', '12 tekrar', 'Gövde tahta gibi düz. Kürek kemiklerini sıkarak göğsünü tutamaklara çek, yavaşça geri in. TRX yoksa kablo ya da bant row yap.', 'TRX row doğru form'),
+  sinav: R('Eğimli şınav', '10–12 tekrar', 'Ellerini bench ya da sehpaya koy, vücut düz. Göğsünü kenara indir, iterek kalk. Bel çökmesin, kalça havaya kalkmasın.', 'incline push up form'),
+  oturKalk: R("Bench'e otur-kalk", '10 tekrar', "Bench'in önünde dur. Kalçayı geriye iterek yavaşça otur, topuklardan iterek kalk. Ağırlık yok. Kalçada ağrı olursa daha yüksek bir yüzey kullan.", 'box squat bodyweight to bench'),
+  bridgeBant: R('Bantlı glute bridge', '15 tekrar', 'Sırtüstü, bant dizlerin üstünde. Kalçanı sıkıp omuz-kalça-diz düz olana dek kaldır, 1 sn tut, yavaşça indir. Beli aşırı kavislendirme.', 'banded glute bridge'),
+  pallof: R('Pallof press', '10 / yön', 'Kablo ya da banda yan dur. Tutamağı göğsünde tut, kollarını düz öne it, gövdenin dönmesine izin verme, geri çek. Sonra diğer yön.', 'pallof press'),
+  birdDog: R('Bird dog', '8 / yön', 'Dört ayak üstünde. Karşı kol ve bacağı uzat, 2 sn tut. Leğen ve gövde sabit, yana devrilme.', 'bird dog exercise'),
+  yanPlank: T('Yan plank (dizler yerde)', 25, 'Yan yat, dizler bükülü ve yerde, dirsek omzun altında. Kalçanı kaldır; baştan dizlere düz çizgi. Kalçada ağrı olursa süreyi kısalt.', 'modified side plank knees', { sides: true }),
+  tekAyak: T('Tek ayak duruşu', 30, 'Bir yere hafifçe tutun. Tek ayak üstünde dik dur, diz hafif bükülü, leğen düz. Ağrılı tarafta süreyi kısalt.', 'single leg balance exercise', { sides: true }),
+  kalcaFleksor: T('Kalça ön esnetme', 30, 'Yarım diz çök (dizin altına havlu koy). Karnını sık, kalçanı hafifçe öne it. Belini çukurlaştırma; ağrısız aralıkta kal.', 'kneeling hip flexor stretch', { sides: true }),
+  hamstring: T('Arka bacak esnetme', 30, 'Sırtüstü, bir bacağı havlu yardımıyla yukarı kaldır; diz hafif bükülü olabilir. Zorlamadan tut, nefesini bırak.', 'lying hamstring stretch towel', { sides: true }),
+  gogus: T('Göğüs ve sırt esnetme', 60, 'Kapı kenarında kolunu 90° koyup göğsünü aç (her yön ~15 sn), ardından çocuk pozunda sırtını uzat.', 'doorway chest stretch'),
+};
+
+const PROGRAM = [
+  {
+    id: 1, title: '1. Gün', name: 'McFit · Güç ve Denge',
+    blocks: [
+      { b: 'Isınma', rest: 30, items: [
+        T('Eliptik veya bisiklet', 600, 'Hafif tempo, konuşabileceğin hız. Direnci düşük tut; kalçada ağrı olmasın.', 'eliptik bisiklet doğru kullanım'),
+      ]},
+      { b: 'Mobilite', rest: 15, items: [ EX.kediDeve('10 tekrar'), EX.pelvikTilt, EX.clam('12 / yön'), EX.deadBug('8 / yön') ] },
+      { b: 'Güç', rounds: 3, rest: 40, roundRest: 90, items: [
+        EX.trxRow, EX.sinav, EX.oturKalk, EX.bridgeBant, EX.pallof, EX.birdDog, EX.yanPlank,
+      ]},
+      { b: 'Denge', rounds: 2, rest: 15, items: [ EX.tekAyak ] },
+      { b: 'Kardiyo', rest: 30, items: [
+        T('Eliptik veya bisiklet · Zone 2', 1500, 'Nabız ~110–128 aralığında: konuşabileceğin tempo. Saatinden takip et.', 'zone 2 kardiyo nedir'),
+      ]},
+      { b: 'Soğuma', rest: 10, items: [ EX.kalcaFleksor, EX.hamstring, EX.gogus ] },
+    ],
+  },
+  {
+    id: 2, title: '2. Gün', name: 'Havuz ve Pilates',
+    blocks: [
+      { b: 'Pilates', rest: 15, items: [
+        R('Nefes + pelvik tilt', '10 tekrar', 'Sırtüstü, dizler bükülü. Burundan al; ağızdan verirken karnını içeri çek ve pelvisi hafifçe yuvarla.', 'pilates breathing pelvic tilt'),
+        R('Hundred (kolay)', '50 kol vuruşu', 'Sırtüstü, dizler 90° havada (zorsa ayaklar yerde). Kollar yanda: 5 vuruş nefes al, 5 vuruş ver. Boyun zorlanırsa başı yerde tut.', 'pilates hundred modified beginner'),
+        R('Pelvic curl', '10 tekrar', 'Sırtüstü. Nefes verirken omurganı tek tek yerden kaldırarak köprü kur, aynı yoldan omur omur in.', 'pilates pelvic curl'),
+        R('Tek bacak çember', '6 / yön / bacak', 'Bir bacak havada (diz hafif bükülebilir), diğeri bükülü yerde. Küçük çemberler çiz, leğen sabit. Kalçada ağrı olursa çemberi küçült ya da geç.', 'pilates single leg circle modified'),
+        R('Single leg stretch (kolay)', '8 / yön', 'Baş ve omuzlar hafif yukarıda. Bir diz göğse, diğer bacak öne uzak; değiştir. Bel yere yapışık kalsın.', 'pilates single leg stretch beginner'),
+        R('Yan yatış serisi', '10 / yön', 'Yan yat. Önce clam (dizleri aç-kapa), sonra üstteki düz bacağı küçükçe kaldır-indir. Leğen öne-arkaya devrilmesin.', 'pilates side lying leg series'),
+        R('Spine stretch forward', '6 tekrar', 'Dik otur, bacaklar kalça genişliğinde (dizler bükülü olabilir). Nefes verirken başından başlayarak öne yuvarlan, omur omur dikleş.', 'pilates spine stretch forward'),
+        T('Swimming (yüzüstü)', 30, 'Yüzüstü. Karşı kol ve bacağı küçük ve yavaş kaldırıp değiştir. Boyun uzun, bel sıkışmasın.', 'pilates swimming exercise beginner'),
+        R('Saw', '6 / yön', 'Oturarak, kollar yana açık. Gövdeni döndür, karşı elinle ayağına doğru testere gibi uzan. Dizler bükülebilir.', 'pilates saw exercise'),
+        T('Mermaid + çocuk pozu', 60, 'Bağdaş kurarak otur, bir kolunu baş üstünden aşırarak yana uzan (her yön ~15 sn). Sonra çocuk pozunda nefesle dinlen.', 'pilates mermaid stretch'),
+      ]},
+      { b: 'Yüzme · Isınma', rest: 30, items: [
+        R('Rahat yüzme', '200 m', 'Rahat serbest stil ya da sırtüstü. Uzun, rahat kulaçlar; nefesini düzenle. Kurbağalama bacağından kaçın.', 'serbest stil yüzme tekniği', { est: 300 }),
+      ]},
+      { b: 'Yüzme · Bacak', rounds: 4, rest: 30, items: [
+        R('Tahta ile bacak', '25 m', 'Tahtayı önde tut. Serbest stil bacak vuruşu: küçük, hızlı, dizden değil kalçadan başlayan. Kurbağalama yok.', 'flutter kick kickboard technique', { est: 45 }),
+      ]},
+      { b: 'Yüzme · Kol', rounds: 4, rest: 30, items: [
+        R('Pull buoy ile kollar', '50 m', 'Pull buoy bacakların arasında, sadece kollar. Kulaçta öne uzan, suyu arkaya doğru it.', 'pull buoy freestyle drill', { est: 75 }),
+      ]},
+      { b: 'Yüzme · Ana set', rounds: 6, rest: 30, items: [
+        R('Orta tempo serbest', '50 m', 'Zorlu ama kontrollü tempo (10 üzerinden 6). Nefes düzenini koru.', 'serbest stil nefes tekniği', { est: 70 }),
+      ]},
+      { b: 'Yüzme · Soğuma', rest: 20, items: [
+        R('Sırtüstü rahat', '100 m', 'Rahat sırtüstü. Kalça ve bacaklar gevşek, vücut suyun üstünde uzun.', 'sırtüstü yüzme tekniği', { est: 150 }),
+        T('Havuzda yürüme + rahat yüzme', 300, 'Havuzda yürü, bacaklarını gevşek salla, istersen rahat yüz. Nabzın düşsün.', 'pool walking exercise'),
+      ]},
+    ],
+  },
+  {
+    id: 3, title: '3. Gün', name: 'McFit · Devre Çalışması',
+    blocks: [
+      { b: 'Isınma', rest: 30, items: [
+        T('Kürek makinesi veya eliptik', 600, 'Kürekte koltuğu ve ayak bandını ayarla; öne gelirken dizler göğse fazla yaklaşmasın. Hafif direnç. Kalça ağrırsa eliptiğe geç.', 'kürek makinesi doğru teknik'),
+      ]},
+      { b: 'Aktivasyon', rest: 15, items: [ EX.kediDeve('8 tekrar'), EX.clam('10 / yön') ] },
+      { b: 'Devre', rounds: 3, rest: 20, roundRest: 90, items: [
+        T("Bench'e otur-kalk", 40, EX.oturKalk.d, EX.oturKalk.q),
+        T('Eğimli şınav', 40, EX.sinav.d, EX.sinav.q),
+        T('TRX / bant row', 40, EX.trxRow.d, EX.trxRow.q),
+        T('Dead bug', 40, EX.deadBug('').d, EX.deadBug('').q),
+        T('Glute bridge', 40, 'Sırtüstü, dizler bükülü. Kalçanı sıkıp kaldır, üstte 1 sn tut, yavaşça indir. Beli aşırı kavislendirme.', 'glute bridge doğru form'),
+        T('Bant pull-apart', 40, 'Bandı omuz hizasında, kollar düz tut. Kolları yana açarak bandı göğsüne doğru ger, kürek kemiklerini sık, yavaşça bırak.', 'band pull apart'),
+        T('Plank', 35, 'Dirsekler omuz altında, baştan topuğa düz çizgi (gerekirse dizler yerde). Kalça yukarı kalkmasın, bel çökmesin.', 'plank doğru form'),
+      ]},
+      { b: 'Bisiklet', rest: 0, items: [
+        T('Sabit bisiklet · ısınma', 300, 'Hafif direnç, rahat tempo. Birazdan intervaller başlayacak; sayaç kendiliğinden ilerler.', 'stationary bike setup seat height'),
+      ]},
+      { b: 'Bisiklet interval', rounds: 6, rest: 0, items: [
+        T('Tempolu', 60, 'Direnci ya da devri artır. Zorlu ama kontrollü (10 üzerinden 7): ancak kısa cümle kurabilirsin.', 'stationary bike intervals beginner', { auto: true }),
+        T('Rahat', 60, 'Direnci düşür, rahat pedal çevir, nefesini topla.', 'stationary bike intervals beginner', { auto: true }),
+      ]},
+      { b: 'Bisiklet', rest: 30, items: [
+        T('Sabit bisiklet · soğuma', 180, 'Hafif direnç, yavaş tempo.', 'stationary bike cool down', { auto: true }),
+      ]},
+      { b: 'Kardiyo', rest: 30, items: [
+        T('Eliptik · Zone 2', 900, 'Nabız ~110–128 aralığında, konuşabileceğin tempo.', 'zone 2 kardiyo nedir'),
+      ]},
+      { b: 'Soğuma', rest: 10, items: [
+        EX.kalcaFleksor, EX.hamstring, EX.gogus,
+        T('Derin nefes', 60, 'Sırtüstü uzan, dizler bükülü. Burundan 4 sn al, ağızdan 6 sn ver. Vücudunu gevşet.', 'diaphragmatic breathing'),
+      ]},
+    ],
+  },
+];
+
+/* ============================================================
+   ÇİZİMLER — her hareket için 3–4 karelik basit figür
+   Açılar derece: 0 = sağ, 90 = yukarı, -90 = aşağı, 180 = sol.
+   t: gövde (kalçadan omuza), hd: baş, a1/a2: kol [üst, alt],
+   l1/l2: bacak [uyluk, baldır] ya da {to:[x,y]} hedef noktası.
+   1 = yakın taraf (açık renk), 2 = uzak taraf (koyu).
+   ============================================================ */
+const sup = (o = {}) => ({ t: 180, hd: 162, a1: [0, 0], a2: [1, 0], l1: { to: [18, 0] }, l2: { to: [19, 0] }, lift: 3, ...o });
+const quad = (o = {}) => ({ t: 20, hd: 10, a1: [-90, -90], a2: [-88, -88], l1: [-90, 180], l2: [-88, 180], f1: 180, f2: 180, ...o });
+const stand = (o = {}) => ({ t: 90, hd: 90, a1: [-96, -88], a2: [-84, -92], l1: [-91, -91], l2: [-89, -89], ...o });
+const prone = (o = {}) => ({ t: 0, hd: 15, a1: [0, 0], a2: [1, 1], l1: [180, 180], l2: [181, 181], f1: 180, f2: 180, lift: 3, ...o });
+const sideLie = (o = {}) => ({ t: 180, hd: 175, a1: [-60, 10], a2: [-120, 100], l1: [-27, 190], l2: [-30, 192], f1: 190, f2: 192, ...o });
+const seat = (o = {}) => ({ t: 90, hd: 90, a1: [0, 0], a2: [2, 2], l1: [0, 0], l2: [1, 1], f1: 90, f2: 90, lift: 2, ...o });
+const curl = (o = {}) => ({ t: 170, hd: 140, a1: [8, 8], a2: [9, 9], l1: [90, 0], l2: [92, 2], lift: 3, ...o });
+const swimP = (o = {}) => ({ t: 0, hd: -6, a1: [0, 0], a2: [186, 183], l1: [177, 180], l2: [183, 180], f1: 180, f2: 180, ...o });
+const bikeP = (n, fa) => ({ t: 62, hd: 55, a1: { to: [27, -14] }, a2: { to: [26, -13] }, l1: { to: n }, l2: { to: fa }, f1: 0, f2: 0, g: 30 });
+const ellP = (h1, h2, n, fa) => ({ t: 86, hd: 88, a1: { to: h1 }, a2: { to: h2 }, l1: { to: n }, l2: { to: fa }, f1: 0, f2: 0, g: 36 });
+const rowP = (t, foot, arm) => ({ t, hd: t, a1: arm, a2: arm, l1: { to: foot }, l2: { to: [foot[0] + 0.5, foot[1]] }, f1: 75, f2: 75, g: 13 });
+
+const BIKE = [{ k: 'bike' }], ELL = [{ k: 'ellip' }], ROW = [{ k: 'rower' }];
+const SW = { swim: true, water: -5 }, SWB = { swim: true, water: -3 };
+const bikeF = [
+  { p: bikeP([12, 22], [-2, 22]), props: BIKE, cap: 'Sele kalça hizasında' },
+  { p: bikeP([5, 29], [5, 15]), props: BIKE, cap: 'Dizi tam kilitleme' },
+  { p: bikeP([-2, 22], [12, 22]), props: BIKE, cap: 'Rahat, düzenli pedal' },
+];
+const ellF = [
+  { p: ellP([17, -13], [9, -15], [8, 29], [-9, 31]), props: ELL, cap: 'Dik dur, karın sıkı' },
+  { p: ellP([9, -15], [17, -13], [-9, 31], [8, 29]), props: ELL, cap: 'Kol ve bacak karşılıklı' },
+  { p: ellP([13, -14], [13.5, -14], [0, 30], [1, 30.5]), props: ELL, cap: 'Topuklar pedalda' },
+];
+const rowF = [
+  { p: rowP(68, [20, 4], [-8, -8]), props: ROW, cap: 'Dizler bükülü, kollar düz' },
+  { p: rowP(90, [28, 4], [-12, -12]), props: ROW, cap: 'Önce bacaklarla it' },
+  { p: rowP(108, [31, 4], { to: [-1, -17], b: -1 }), props: ROW, cap: 'Hafif geri yaslan, kolu çek' },
+];
+const bridgeF = (band, caps) => {
+  const pr = band ? [{ k: 'ring', at: 'K1' }] : [];
+  return [
+    { p: sup({ hd: 160, l1: { to: [15, 0] }, l2: { to: [15.5, 0] } }), props: pr, cap: caps[0] },
+    { p: sup({ t: 200, hd: 165, l1: { to: [16.6, 8.9] }, l2: { to: [17.1, 8.9] } }), props: pr, cap: caps[1] },
+    { p: sup({ t: 218, hd: 160, l1: { to: [19.5, 16] }, l2: { to: [20, 16] } }), props: pr, cap: caps[2] },
+  ];
+};
+const clamF = (band) => {
+  const pr = band ? [{ k: 'band', a: 'K1', b: 'K2' }] : [];
+  return [
+    { p: sideLie(), props: pr, cap: 'Yan yat, dizler bükülü' },
+    { p: sideLie({ l1: [8, 216] }), props: pr, cap: 'Topuklar bitişik, üst dizi aç' },
+    { p: sideLie({ l1: [-16, 200] }), props: pr, cap: 'Yavaşça kapat' },
+  ];
+};
+const STRAP = [{ k: 'strap', to: ['F1', 34, -80] }];
+const BENCH_H = [{ k: 'box', x: ['W1', 3, 0], top: ['W1', 0, 2.5], w: 20 }];
+const BENCH_B = [{ k: 'box', x: ['F1', -20, 0], h: 18, w: 16 }];
+const CABLE = [{ k: 'post', x: ['H', -40, 0], top: ['H', 0, -45] }, { k: 'line', a: ['H', -40, -22], b: 'W1', c: 'pr dash' }];
+const POST = [{ k: 'post', x: ['H', 20, 0], top: ['H', 0, -7] }];
+const TOWEL = [{ k: 'line', a: 'W1', b: 'T1', c: 'band' }];
+const CROSS = { front: true, l1: [-8, 200], l2: [188, -20], f1: 200, f2: -20 };
+const VLEGS = { front: true, l1: [-28, -28], l2: [208, 208], f1: 70, f2: 110 };
+const FSTAND = { front: true, t: 90, hd: 90, l1: [-84, -88], l2: [-96, -92], f1: -20, f2: 200 };
+const LC = (a) => sup({ hd: 160, l2: { to: [15, 0] }, l1: [a, a], f1: a });
+const CHILD = { t: -15, hd: 0, a1: [-17, -5], a2: [-16, -6], l1: [-55, 180], l2: [-56, 180], f1: 180, f2: 180 };
+const PLANK = { t: 13, hd: 13, a1: [-90, 0], a2: [-90, 1], l1: [193, 193], l2: [194, 194], f1: 200, f2: 200 };
+const SIDEPL1 = { t: 150, hd: 160, a1: [-90, 180], a2: { to: [-4, -4], b: 1 }, l1: [0, 30], l2: [2, 32], f1: 30, f2: 32, lift: 2 };
+const KNEEL2 = { t: 92, hd: 92, a1: { to: [3, -3] }, a2: { to: [2, -2] }, l1: { to: [10, 13] }, l2: [-125, 180], f1: 0, f2: 180 };
+const PALLOF1 = stand({ a1: { to: [8, -20] }, a2: { to: [7.5, -20] }, l1: { to: [3, 30] }, l2: { to: [-3, 30] } });
+const PULL1 = { ...FSTAND, a1: { to: [5, -20], b: 1 }, a2: { to: [-5, -20], b: -1 } };
+const SINAV1 = { t: 40, hd: 40, a1: [-50, -50], a2: [-52, -52], l1: [220, 220], l2: [221, 221] };
+const KICK1 = { t: 0, hd: 22, a1: [0, 0], a2: [1, 1], l1: [173, 182], l2: [187, 178], f1: 180, f2: 180 };
+const BACK1 = { t: 0, hd: 10, a1: [0, 0], a2: [182, 181], l1: [178, 180], l2: [182, 180], f1: 172, f2: 172 };
+
+const ILLUS = {
+  kediDeve: [
+    { p: quad(), cap: 'Dört ayak, sırt düz' },
+    { p: quad({ c: 7, hd: -45 }), cap: 'Nefes ver, sırtı yuvarla' },
+    { p: quad({ c: -5, hd: 35 }), cap: 'Nefes al, göğsü aç' },
+  ],
+  pelvikTilt: [
+    { p: sup({ c: -3 }), cap: 'Sırtüstü, bel boşluğu var' },
+    { p: sup({ c: 1 }), props: [{ k: 'arrow', a: ['H', -9, -10], b: ['H', -9, -3] }], cap: 'Karnı sık, beli yere bastır' },
+    { p: sup({ c: -3 }), cap: 'Bırak, tekrarla' },
+  ],
+  clam: clamF(true),
+  sideSeries: [...clamF(false).slice(0, 2), { p: sideLie({ l1: [6, 6], f1: 6 }), cap: 'Üst bacağı düz kaldır-indir' }],
+  deadBug: [
+    { p: sup({ hd: 155, a1: [90, 90], a2: [92, 92], l1: [90, 0], l2: [92, 2] }), cap: 'Kollar yukarı, dizler 90°' },
+    { p: sup({ hd: 155, a1: [172, 172], a2: [92, 92], l1: [90, 0], l2: [12, 12] }), cap: 'Karşı kol ve bacağı uzat' },
+    { p: sup({ hd: 155, a1: [90, 90], a2: [172, 172], l1: [10, 10], l2: [92, 2] }), cap: 'Geri gel, diğer taraf' },
+  ],
+  trxRow: [
+    { p: { t: 120, hd: 115, a1: [32, 32], a2: [30, 30], l1: [-60, -60], l2: [-61, -61] }, props: STRAP, cap: 'Gövde düz, kollar uzun' },
+    { p: { t: 116, hd: 110, a1: { to: [0.6, -29.4], b: -1 }, a2: { to: [0.2, -29], b: -1 }, l1: [-62, -62], l2: [-63, -63] }, props: STRAP, cap: 'Kürek kemiklerini sık' },
+    { p: { t: 112, hd: 105, a1: { to: [-2.6, -17.3], b: -1 }, a2: { to: [-3, -17], b: -1 }, l1: [-65, -65], l2: [-66, -66] }, props: STRAP, cap: 'Göğsü tutamaklara çek' },
+  ],
+  sinav: [
+    { p: SINAV1, props: BENCH_H, cap: "Eller bench'te, gövde düz" },
+    { p: { t: 30, hd: 30, a1: { to: [32.1, -1.6], b: -1 }, a2: { to: [32.5, -1.6], b: -1 }, l1: [210, 210], l2: [211, 211] }, props: BENCH_H, cap: 'Göğsü kenara indir' },
+    { p: SINAV1, props: BENCH_H, cap: 'İterek kalk' },
+  ],
+  oturKalk: [
+    { p: stand({ a1: [-80, -60], a2: [-78, -58] }), props: BENCH_B, cap: "Bench'in önünde dur" },
+    { p: { t: 62, hd: 70, a1: [-5, -5], a2: [-3, -3], l1: { to: [14, 25] }, l2: { to: [14.5, 25] } }, props: BENCH_B, cap: 'Kalçayı geriye it' },
+    { p: { t: 58, hd: 68, a1: [0, 0], a2: [2, 2], l1: { to: [18, 18] }, l2: { to: [18.5, 18] } }, props: BENCH_B, cap: 'Hafifçe değ, topuktan kalk' },
+  ],
+  bridgeBant: bridgeF(true, ['Bant dizlerin üstünde', 'Kalçayı sıkıp kaldır', 'Düz çizgi, 1 sn tut']),
+  bridge: bridgeF(false, ['Sırtüstü, dizler bükülü', 'Kalçayı sıkıp kaldır', 'Düz çizgi, 1 sn tut']),
+  pelvicCurl: bridgeF(false, ['Sırtüstü, nefes al', 'Omurları tek tek kaldır', 'Köprü, omur omur in']),
+  pallof: [
+    { p: PALLOF1, props: CABLE, cap: 'Kablo yanda, eller göğüste' },
+    { p: stand({ a1: [2, 2], a2: [3, 3], l1: { to: [3, 30] }, l2: { to: [-3, 30] } }), props: CABLE, cap: 'Kolları öne it, gövde dönmesin' },
+    { p: PALLOF1, props: CABLE, cap: 'Yavaşça geri çek' },
+  ],
+  birdDog: [
+    { p: quad(), cap: 'Dört ayak, sırt düz' },
+    { p: quad({ a1: [5, 5], l2: [184, 184], f2: 184 }), cap: 'Karşı kol ve bacak, 2 sn' },
+    { p: quad({ a2: [5, 5], l1: [184, 184], f1: 184 }), cap: 'Diğer taraf' },
+  ],
+  yanPlank: [
+    { p: SIDEPL1, cap: 'Dirsek omuz altında' },
+    { p: { t: 162, hd: 168, a1: [-90, 180], a2: { to: [-5, -4], b: 1 }, l1: [-18, 22], l2: [-16, 24], f1: 22, f2: 24 }, props: [{ k: 'arrow', a: ['H', 0, 7], b: ['H', 0, -3] }], cap: 'Kalçayı kaldır, düz çizgi' },
+    { p: SIDEPL1, cap: 'Yavaşça indir' },
+  ],
+  tekAyak: [
+    { p: stand({ a1: { to: [17, -8] } }), props: POST, cap: 'Hafifçe tutun, dik dur' },
+    { p: stand({ a1: { to: [17, -8] }, l1: [-30, -100] }), props: POST, cap: 'Bir ayağı kaldır · 30 sn' },
+    { p: stand({ a1: { to: [17, -8] }, l2: [-30, -100] }), props: POST, cap: 'Diğer ayak · 30 sn' },
+  ],
+  kalcaFleksor: [
+    { p: { t: 90, hd: 90, a1: { to: [3, -3] }, a2: { to: [2, -2] }, l1: [0, -90], l2: [-105, 180], f1: 0, f2: 180 }, cap: 'Yarım diz çök' },
+    { p: KNEEL2, props: [{ k: 'arrow', a: ['H', -6, -8], b: ['H', 5, -8] }], cap: 'Kalçayı öne it, karın sıkı' },
+    { p: KNEEL2, cap: '30 sn tut, sonra diğer taraf' },
+  ],
+  hamstring: [
+    { p: sup({ hd: 160 }), cap: 'Sırtüstü, dizler bükülü' },
+    { p: sup({ hd: 155, l1: [84, 86], a1: { to: [-12, -14], b: 1 }, a2: { to: [-12.5, -13.5], b: 1 } }), props: TOWEL, cap: 'Bacağı havluyla kaldır' },
+    { p: sup({ hd: 155, l1: [76, 98], a1: { to: [-13, -12], b: 1 }, a2: { to: [-13.5, -11.5], b: 1 } }), props: TOWEL, cap: 'Diz hafif bükülebilir · 30 sn' },
+  ],
+  gogus: [
+    { p: stand({ a1: [180, 90] }), props: [{ k: 'vline', x: ['E1', -2.5, 0], top: ['E1', 0, -22] }], cap: 'Kol 90°, kapı kenarında' },
+    { p: stand({ t: 84, hd: 86, a1: [178, 88], l1: { to: [9, 31] }, l2: { to: [-7, 31.5] } }), props: [{ k: 'vline', x: ['E1', -2.5, 0], top: ['E1', 0, -22] }], cap: 'Öne adım at, göğsü aç' },
+    { p: CHILD, own: true, cap: 'Çocuk pozu, sırtı uzat' },
+  ],
+  hundred: [
+    { p: sup({ hd: 158, l1: [90, 0], l2: [92, 2] }), cap: 'Sırtüstü, dizler 90°' },
+    { p: curl(), cap: 'Baş ve omuzlar kalkık' },
+    { p: curl({ a1: [-6, -6], a2: [-5, -5] }), props: [{ k: 'arrow', a: ['W1', 0, -8], b: ['W1', 0, 0] }], cap: '5 vuruş al, 5 vuruş ver' },
+  ],
+  legCircle: [
+    { p: LC(90), props: [{ k: 'orbit', at: 'F1', r: 5 }], cap: 'Bir bacak yukarı' },
+    { p: LC(102), props: [{ k: 'orbit', at: 'F1', r: 5 }], cap: 'Küçük çember çiz' },
+    { p: LC(80), props: [{ k: 'orbit', at: 'F1', r: 5 }], cap: 'Yön değiştir, leğen sabit' },
+  ],
+  singleLeg: [
+    { p: curl({ a1: { to: [-2, -14] }, a2: { to: [-1, -14] } }), cap: 'Baş kalkık, dizler 90°' },
+    { p: curl({ l1: [115, 10], l2: [35, 35], a1: { to: [-5, -14] }, a2: { to: [-4, -13] } }), cap: 'Bir diz göğse, diğeri uzak' },
+    { p: curl({ l2: [115, 10], l1: [35, 35], a1: { to: [-5, -13] }, a2: { to: [-4, -14] } }), cap: 'Bacak değiştir' },
+  ],
+  spineStretch: [
+    { p: seat(), cap: 'Dik otur, kollar önde' },
+    { p: seat({ t: 45, hd: -15, c: 7, a1: [-12, -12], a2: [-11, -11] }), cap: 'Nefes ver, öne yuvarlan' },
+    { p: seat({ t: 70, hd: 40, c: 4, a1: [-4, -4], a2: [-3, -3] }), cap: 'Omur omur dikleş' },
+  ],
+  swimmingP: [
+    { p: prone(), cap: 'Yüzüstü, kollar önde' },
+    { p: prone({ a1: [16, 14], l2: [165, 165], f2: 165 }), cap: 'Karşı kol ve bacak kalkar' },
+    { p: prone({ a2: [16, 14], l1: [165, 165], f1: 165 }), cap: 'Değiştir, yavaş' },
+  ],
+  saw: [
+    { p: { ...VLEGS, t: 90, hd: 90, a1: [0, 0], a2: [180, 180] }, cap: 'Bacaklar açık, kollar yanda' },
+    { p: { ...VLEGS, t: 62, hd: 35, a1: [50, 70], a2: [-40, -50] }, cap: 'Dön, karşı ayağa uzan' },
+    { p: { ...VLEGS, t: 118, hd: 145, a1: [-140, -130], a2: [130, 110] }, cap: 'Diğer tarafa' },
+  ],
+  mermaid: [
+    { p: { ...CROSS, t: 90, hd: 90, a1: [-75, -95], a2: [-105, -85] }, cap: 'Bağdaş kur, dik otur' },
+    { p: { ...CROSS, t: 72, hd: 68, a1: [-80, -95], a2: [70, 15] }, cap: 'Kolu aşırarak yana uzan' },
+    { p: { ...CROSS, t: 108, hd: 112, a1: [110, 165], a2: [-100, -85] }, cap: 'Diğer yana' },
+    { p: CHILD, own: true, cap: 'Çocuk pozunda dinlen' },
+  ],
+  freestyle: [
+    { ...SW, p: swimP(), cap: 'Uzun kulaç, yüz suda' },
+    { ...SW, p: swimP({ a1: [118, -35], a2: [-80, -105], l1: [183, 180], l2: [177, 180] }), cap: 'Dirsek yukarıda' },
+    { ...SW, p: swimP({ a1: [186, 183], a2: [0, 0] }), cap: 'Suyu arkaya it' },
+  ],
+  kick: [
+    { ...SW, p: KICK1, props: [{ k: 'board', at: 'W1' }], cap: 'Tahta önde, kollar uzun' },
+    { ...SW, p: { ...KICK1, l1: [187, 178], l2: [173, 182] }, props: [{ k: 'board', at: 'W1' }], cap: 'Küçük ve hızlı vuruş' },
+    { ...SW, p: KICK1, props: [{ k: 'board', at: 'W1' }, { k: 'arrow', a: ['K1', -2, -5], b: ['K1', -2, 3] }], cap: 'Vuruş kalçadan başlar' },
+  ],
+  pullBuoy: [
+    { ...SW, p: swimP({ l1: [180, 180], l2: [181, 181] }), props: [{ k: 'buoy' }], cap: 'Pull buoy bacak arasında' },
+    { ...SW, p: swimP({ a1: [118, -35], a2: [-80, -105], l1: [180, 180], l2: [181, 181] }), props: [{ k: 'buoy' }], cap: 'Sadece kollar çalışır' },
+    { ...SW, p: swimP({ a1: [186, 183], a2: [0, 0], l1: [180, 180], l2: [181, 181] }), props: [{ k: 'buoy' }], cap: 'Kulaçta öne uzan' },
+  ],
+  backstroke: [
+    { ...SWB, p: BACK1, cap: 'Sırtüstü, kulaklar suda' },
+    { ...SWB, p: { ...BACK1, a1: [95, 92], a2: [-100, -150] }, cap: 'Kol düz, havadan geçer' },
+    { ...SWB, p: { ...BACK1, a1: [182, 181], a2: [0, 0] }, cap: 'Diğer kol' },
+  ],
+  poolWalk: [
+    { water: -18, p: stand({ l1: [-72, -96], l2: [-108, -90], a1: [-115, -100], a2: [-68, -75] }), cap: 'Havuzda yürü' },
+    { water: -18, p: stand({ l2: [-72, -96], l1: [-108, -90], a2: [-115, -100], a1: [-68, -75] }), cap: 'Rahat adımlar' },
+    { water: -18, p: stand(), cap: 'Bacakları gevşet' },
+  ],
+  plank: [
+    { p: { t: 18, hd: 18, a1: [-90, 0], a2: [-90, 1], l1: [198, 180], l2: [199, 180], f1: 180, f2: 180 }, cap: 'Kolay: dizler yerde' },
+    { p: PLANK, cap: 'Tam plank' },
+    { p: PLANK, props: [{ k: 'line', a: 'F1', b: 'N', c: 'acc dash' }], cap: 'Baştan topuğa düz çizgi' },
+  ],
+  pullApart: [
+    { p: PULL1, props: [{ k: 'band', a: 'W1', b: 'W2' }], cap: 'Bant göğüs önünde' },
+    { p: { ...FSTAND, a1: [0, 0], a2: [180, 180] }, props: [{ k: 'band', a: 'W1', b: 'W2' }], cap: 'Kolları yana aç, sık' },
+    { p: PULL1, props: [{ k: 'band', a: 'W1', b: 'W2' }], cap: 'Yavaşça bırak' },
+  ],
+  breath: [
+    { p: sup({ hd: 160, c: -4, a1: { to: [-13, -6], b: 1 } }), cap: 'Burundan al · 4 sn' },
+    { p: sup({ hd: 160, a1: { to: [-13, -3], b: 1 } }), cap: 'Ağızdan ver · 6 sn' },
+    { p: sup({ hd: 160 }), cap: 'Omuzlar ve çene gevşek' },
+  ],
+  bike: bikeF,
+  ellip: ellF,
+  ellipBike: [
+    { ...ellF[0], cap: 'Eliptik: dik dur' },
+    { ...ellF[1], cap: 'Kol ve bacak karşılıklı' },
+    { ...bikeF[0], cap: 'Bisiklet: sele kalça hizası' },
+    { ...bikeF[2], cap: 'Rahat, düzenli pedal' },
+  ],
+  rowEllip: [...rowF, { ...ellF[0], cap: 'Kalça ağrırsa eliptiğe geç' }],
+};
+
+// Hareket adı → çizim
+const IMG_BY_NAME = {
+  'Eliptik veya bisiklet': 'ellipBike', 'Eliptik veya bisiklet · Zone 2': 'ellipBike',
+  'Kedi-deve': 'kediDeve', 'Pelvik tilt': 'pelvikTilt', 'Nefes + pelvik tilt': 'pelvikTilt',
+  'Bantlı clamshell': 'clam', 'Dead bug': 'deadBug', 'TRX row': 'trxRow', 'TRX / bant row': 'trxRow',
+  'Eğimli şınav': 'sinav', "Bench'e otur-kalk": 'oturKalk', 'Bantlı glute bridge': 'bridgeBant', 'Glute bridge': 'bridge',
+  'Pallof press': 'pallof', 'Bird dog': 'birdDog', 'Yan plank (dizler yerde)': 'yanPlank', 'Tek ayak duruşu': 'tekAyak',
+  'Kalça ön esnetme': 'kalcaFleksor', 'Arka bacak esnetme': 'hamstring', 'Göğüs ve sırt esnetme': 'gogus',
+  'Hundred (kolay)': 'hundred', 'Pelvic curl': 'pelvicCurl', 'Tek bacak çember': 'legCircle',
+  'Single leg stretch (kolay)': 'singleLeg', 'Yan yatış serisi': 'sideSeries', 'Spine stretch forward': 'spineStretch',
+  'Swimming (yüzüstü)': 'swimmingP', 'Saw': 'saw', 'Mermaid + çocuk pozu': 'mermaid',
+  'Rahat yüzme': 'freestyle', 'Orta tempo serbest': 'freestyle', 'Tahta ile bacak': 'kick', 'Pull buoy ile kollar': 'pullBuoy',
+  'Sırtüstü rahat': 'backstroke', 'Havuzda yürüme + rahat yüzme': 'poolWalk',
+  'Kürek makinesi veya eliptik': 'rowEllip', 'Bant pull-apart': 'pullApart', 'Plank': 'plank',
+  'Sabit bisiklet · ısınma': 'bike', 'Tempolu': 'bike', 'Rahat': 'bike', 'Sabit bisiklet · soğuma': 'bike',
+  'Eliptik · Zone 2': 'ellip', 'Derin nefes': 'breath',
+};
+// Çizim → doğru yapılış videosu (YouTube kimliği). Hepsi gömülebilir olarak doğrulandı (2026-11-20).
+const VIDEO = {
+  kediDeve: 'IPEXJ4FHDXQ', pelvikTilt: 'n8DU1desCy8', clam: '4T2P_-MV9g0', sideSeries: 'S0uZzU3ipC0',
+  deadBug: 'bxn9FBrt4-A', trxRow: 'N_14s8zFOms', sinav: 'Oy1AzohemMc', oturKalk: 'YFR1MEOZNXQ',
+  bridgeBant: 'D59C72n1lyQ', bridge: 'D59C72n1lyQ', pelvicCurl: 'RC6qOEZdRU8', pallof: 'LA6Uc5yIV1c',
+  birdDog: 'LaLKNS7mxrk', yanPlank: 'UurF0EhHFLg', tekAyak: '3j0O6jRe8uY', kalcaFleksor: 'F55tzqJggAY',
+  hamstring: 'UzYGpvw1IHg', gogus: 'M850sCj9LHQ', hundred: 'hyzfkG7oKeQ', legCircle: 't7LdRat86V4',
+  singleLeg: 'TlkVjAOaKBo', spineStretch: 'LJlMdJlAcac', swimmingP: 'N-aII025loc', saw: '3j55oo1ifbQ',
+  mermaid: 'iHyv-98yaJM', freestyle: 'WLIkQoXLf5c', kick: 'ZD-h2Em_Lvs', pullBuoy: 'ITK0chbKegI',
+  backstroke: 'e6mF9DSA8CA', poolWalk: 'ZgxniVfKT4I', plank: 'Q2MbIzmkcho', pullApart: 'Zxp9IORjjK4',
+  breath: '5AFchTB2eXE', bike: 'rlOOqDgDU3U', ellip: 'RakIFxUmSpA', ellipBike: 'RakIFxUmSpA', rowEllip: 'JunqWhTXTJs',
+};
+PROGRAM.forEach((d) => d.blocks.forEach((b) => b.items.forEach((it) => {
+  if (!it.img) it.img = IMG_BY_NAME[it.n];
+  if (!it.vid) it.vid = VIDEO[it.img];
+})));
+// Gömülü oynatıcı yalnızca normal bir web adresinde çalışır (Claude bağlantısında ve yerel dosyada çalışmaz)
+const CAN_EMBED = /\.github\.io$/.test(location.hostname) || ['localhost', '127.0.0.1'].includes(location.hostname);
+
+const FIG = (() => {
+  const L = { torso: 26, nh: 10, head: 6, ua: 13, fa: 12, th: 16, sh: 16, foot: 5 };
+  const RAD = Math.PI / 180;
+  const pt = (p, a, len) => [p[0] + Math.cos(a * RAD) * len, p[1] - Math.sin(a * RAD) * len];
+  const ang = (p, q) => Math.atan2(p[1] - q[1], q[0] - p[0]) / RAD;
+  const dist = (p, q) => Math.hypot(q[0] - p[0], q[1] - p[1]);
+  const f = (n) => Math.round(n * 10) / 10;
+  const P = (p) => `${f(p[0])} ${f(p[1])}`;
+  const KEYS = ['H', 'S', 'E1', 'E2', 'W1', 'W2', 'K1', 'K2', 'F1', 'F2', 'T1', 'T2'];
+
+  // İki parçalı uzuv: açı listesi ya da hedef noktaya ters kinematik
+  function limb(root, spec, a, b, bend) {
+    if (Array.isArray(spec)) { const m = pt(root, spec[0], a); return [m, pt(m, spec[1], b)]; }
+    const T = spec.to;
+    const d = Math.min(Math.max(dist(root, T), Math.abs(a - b) + 0.5), a + b - 0.1);
+    const al = Math.acos(Math.min(1, Math.max(-1, (a * a + d * d - b * b) / (2 * a * d)))) / RAD;
+    const m = pt(root, ang(root, T) + (spec.b ?? bend) * al, a);
+    return [m, pt(m, ang(m, T), b)];
+  }
+
+  function build(p) {
+    const J = { H: [0, 0] };
+    J.S = pt(J.H, p.t, L.torso);
+    J.N = pt(J.S, p.hd ?? p.t, L.nh);
+    if (p.front) {
+      J.S1 = pt(J.S, p.t - 90, 7); J.S2 = pt(J.S, p.t + 90, 7);
+      J.H1 = pt(J.H, p.t - 90, 4.5); J.H2 = pt(J.H, p.t + 90, 4.5);
+    } else { J.S1 = J.S2 = J.S; J.H1 = J.H2 = J.H; }
+    for (const i of [1, 2]) {
+      [J['E' + i], J['W' + i]] = limb(J['S' + i], p['a' + i] || [-90, -90], L.ua, L.fa, -1);
+      [J['K' + i], J['F' + i]] = limb(J['H' + i], p['l' + i] || [-90, -90], L.th, L.sh, 1);
+      J['T' + i] = pt(J['F' + i], p['f' + i] ?? ang(J['K' + i], J['F' + i]) + 90, L.foot);
+    }
+    J.C = pt([(J.H[0] + J.S[0]) / 2, (J.H[1] + J.S[1]) / 2], p.t + 90, p.c || 0);
+    return J;
+  }
+
+  function props(list, J, G) {
+    const R = (s) => {
+      const [ref, dx = 0, dy = 0] = Array.isArray(s) ? s : [s];
+      const b = ref === 'G' ? [0, G] : J[ref];
+      return [b[0] + dx, b[1] + dy];
+    };
+    let back = '', front = '';
+    const pts = [];
+    const add = (svg, ps, fr) => { if (fr) front += svg; else back += svg; pts.push(...ps); };
+    const line = (a, b, cls, fr) => add(`<path class="${cls}" d="M${P(a)} L${P(b)}"/>`, [a, b], fr);
+    const circ = (c, r, cls, fr) => add(`<circle class="${cls}" cx="${f(c[0])}" cy="${f(c[1])}" r="${r}"/>`, [[c[0] - r, c[1] - r], [c[0] + r, c[1] + r]], fr);
+    const rect = (x, y, w, h, cls, fr) => add(`<rect class="${cls}" x="${f(x)}" y="${f(y)}" width="${f(w)}" height="${f(h)}" rx="1.5"/>`, [[x, y], [x + w, y + h]], fr);
+    const arrow = (a, b) => {
+      const an = Math.atan2(b[1] - a[1], b[0] - a[0]), h = 3.2;
+      const p1 = [b[0] - h * Math.cos(an - 0.5), b[1] - h * Math.sin(an - 0.5)];
+      const p2 = [b[0] - h * Math.cos(an + 0.5), b[1] - h * Math.sin(an + 0.5)];
+      add(`<path class="acc" d="M${P(a)} L${P(b)} M${P(p1)} L${P(b)} L${P(p2)}"/>`, [a, b], true);
+    };
+    for (const o of list || []) {
+      if (o.k === 'box') { const x = R(o.x)[0], top = o.h != null ? G - o.h : R(o.top)[1]; rect(x - o.w / 2, top, o.w, G - top, 'prf'); }
+      else if (o.k === 'line') line(R(o.a), R(o.b), o.c || 'pr', true);
+      else if (o.k === 'band') line(R(o.a), R(o.b), 'band', true);
+      else if (o.k === 'ring') circ(R(o.at), 3, 'band', true);
+      else if (o.k === 'arrow') arrow(R(o.a), R(o.b));
+      else if (o.k === 'orbit') circ(R(o.at), o.r, 'acc dash', true);
+      else if (o.k === 'board') { const c = J.W1; rect(c[0] - 3, c[1] - 2.5, 18, 4.5, 'prf', true); }
+      else if (o.k === 'buoy') { const c = [J.H[0] * 0.4 + J.K1[0] * 0.6, J.H[1] * 0.4 + J.K1[1] * 0.6]; add(`<ellipse class="prf" cx="${f(c[0])}" cy="${f(c[1])}" rx="5" ry="3"/>`, [c], true); }
+      else if (o.k === 'strap') { const e = pt(J.W1, ang(J.W1, R(o.to)), 30); line(J.W1, e, 'pr'); line(pt(J.W1, ang(J.W1, R(o.to)) + 90, 2.5), pt(J.W1, ang(J.W1, R(o.to)) - 90, 2.5), 'pr thick', true); }
+      else if (o.k === 'post') { const x = R(o.x)[0], top = R(o.top)[1]; line([x, G], [x, top], 'pr thick'); line([x - 3, top], [x + 3, top], 'pr thick'); }
+      else if (o.k === 'vline') { const x = R(o.x)[0], top = R(o.top)[1]; line([x, G], [x, top], 'pr thick'); }
+      else if (o.k === 'bike') {
+        const C = R(['H', 5, 22]), W = R(['H', 31, 20]);
+        line(R(['G', -12, 0]), R(['G', 42, 0]), 'pr thick');
+        line(R(['H', 0, 4]), C, 'pr'); line(C, W, 'pr'); circ(C, 7, 'pr thin'); circ(W, 9, 'pr');
+        line(W, R(['H', 29, -12]), 'pr'); line(R(['H', 29, -12]), R(['H', 24, -14]), 'pr thick');
+        rect(-6, 2, 11, 2.5, 'prf');
+      } else if (o.k === 'ellip') {
+        const piv = R(['H', 24, -8]);
+        line(R(['G', -26, 0]), R(['G', 30, 0]), 'pr thick'); line(R(['G', 30, 0]), piv, 'pr');
+        line(piv, J.W1, 'pr'); line(piv, J.W2, 'pr');
+        for (const i of [1, 2]) { line(R(['F' + i, -3, 2]), R(['G', -24, -1]), 'pr thin'); line(R(['F' + i, -3, 2]), R(['T' + i, 1, 2]), 'pr thick'); }
+      } else if (o.k === 'rower') {
+        const F = J.F1, y = 5, fw = [F[0] + 12, F[1] - 5];
+        line([F[0] + 12, y], [F[0] - 48, y], 'pr thick'); line([F[0] + 10, y], [F[0] + 10, G], 'pr'); line([F[0] - 46, y], [F[0] - 46, G], 'pr');
+        rect(-5, 2, 10, 3, 'prf'); circ(fw, 7, 'prf'); line(fw, J.W1, 'pr thin'); line([F[0] - 1, F[1] - 6], [F[0] + 3, F[1] + 3], 'pr thick');
+      }
+    }
+    return { back, front, pts };
+  }
+
+  function layout(F) {
+    const p = F.p, J = build(p);
+    const G = p.g ?? Math.max(Math.max(...KEYS.map((k) => J[k][1])) + (p.lift || 0), J.N[1] + L.head);
+    const pr = props(F.props, J, G);
+    const pts = KEYS.map((k) => J[k]).concat([[J.N[0] - L.head, J.N[1] - L.head], [J.N[0] + L.head, J.N[1] + L.head]], pr.pts);
+    const xs = pts.map((q) => q[0]), ys = pts.map((q) => q[1]);
+    const box = { x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: F.swim ? Math.max(...ys) : G };
+    if (F.water != null) box.y0 = Math.min(box.y0, F.water - 3);
+    const s = Math.min(1.7, 110 / (box.x1 - box.x0), (F.swim ? 66 : 74) / (box.y1 - box.y0));
+    return { J, G, pr, box, s };
+  }
+
+  function svg(F, lay, s) {
+    const { J, G, pr, box } = lay;
+    const tx = 60 - s * (box.x0 + box.x1) / 2;
+    const ty = F.swim ? 44 - s * (box.y0 + box.y1) / 2 : 80 - s * G;
+    const leg = (i) => `M${P(J['H' + i])} L${P(J['K' + i])} L${P(J['F' + i])} L${P(J['T' + i])}`;
+    const arm = (i) => `M${P(J['S' + i])} L${P(J['E' + i])} L${P(J['W' + i])}`;
+    let torso = `M${P(J.H)} Q${P(J.C)} ${P(J.S)} L${P(J.N)}`;
+    if (F.p.front) torso += ` M${P(J.S1)} L${P(J.S2)} M${P(J.H1)} L${P(J.H2)}`;
+    let out = F.swim ? '' : '<path class="floor" d="M0 80.5 L120 80.5"/>';
+    out += `<g transform="translate(${f(tx)} ${f(ty)}) scale(${s.toFixed(3)})">${pr.back}`
+      + `<path class="${F.p.front ? 'ln' : 'lf'}" d="${leg(2)} ${arm(2)}"/>`
+      + `<path class="tr" d="${torso}"/><circle class="hd" cx="${f(J.N[0])}" cy="${f(J.N[1])}" r="${L.head}"/>`
+      + `<path class="ln" d="${leg(1)} ${arm(1)}"/>${pr.front}</g>`;
+    if (F.water != null) {
+      const wy = f(ty + s * F.water);
+      out += `<path class="water" d="M0 ${wy}${' q3.75 -2 7.5 0 t7.5 0'.repeat(8)} L120 84 L0 84 Z"/>`;
+    }
+    return `<svg viewBox="0 0 120 84" class="fig" aria-hidden="true">${out}</svg>`;
+  }
+
+  const cache = {};
+  function frames(key) {
+    if (!key || !ILLUS[key]) return null;
+    if (cache[key]) return cache[key];
+    const list = ILLUS[key], lays = list.map(layout);
+    const s = Math.min(...lays.filter((l, i) => !list[i].own).map((l) => l.s));
+    return (cache[key] = list.map((F, i) => ({ svg: svg(F, lays[i], F.own ? lays[i].s : s), cap: F.cap })));
+  }
+  return { frames };
+})();
+
+/* ============================================================
+   Programı adım listesine çevir
+   ============================================================ */
+function buildSteps(day) {
+  const steps = [];
+  day.blocks.forEach((blk) => {
+    const rounds = blk.rounds || 1;
+    for (let r = 1; r <= rounds; r++) {
+      blk.items.forEach((it, i) => {
+        const lastInRound = i === blk.items.length - 1;
+        const rest = (lastInRound && r < rounds) ? (blk.roundRest ?? blk.rest) : (it.rest ?? blk.rest ?? 30);
+        const base = { ...it, block: blk.b, round: r, rounds };
+        if (it.t === 'time' && it.sides) {
+          steps.push({ ...base, n: it.n + ' · sol', rest: it.sideRest ?? 10 });
+          steps.push({ ...base, n: it.n + ' · sağ', rest });
+        } else {
+          steps.push({ ...base, rest });
+        }
+      });
+    }
+  });
+  if (steps.length) steps[steps.length - 1].rest = 0;
+  return steps;
+}
+
+function estimateMin(steps) {
+  const sec = steps.reduce((s, st) => s + (st.t === 'time' ? st.v : (st.est || 60)) + (st.rest || 0), 0);
+  return Math.round(sec / 60 / 5) * 5;
+}
+
+/* ============================================================
+   Yardımcılar
+   ============================================================ */
+const $ = (id) => document.getElementById(id);
+const pad = (n) => String(n).padStart(2, '0');
+function fmtClock(sec) {
+  sec = Math.max(0, Math.round(sec));
+  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+  return h ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
+}
+function fmtDur(ms) {
+  const min = Math.round(ms / 60000);
+  const h = Math.floor(min / 60), m = min % 60;
+  return h ? `${h} sa ${m} dk` : `${m} dk`;
+}
+function valueText(st) {
+  if (st.t !== 'time') return st.v;
+  return st.v >= 60 ? fmtClock(st.v) : `${st.v} sn`;
+}
+function store(key, val) {
+  try { if (val === undefined) return JSON.parse(localStorage.getItem(key)); localStorage.setItem(key, JSON.stringify(val)); } catch (e) { return null; }
+}
+function unstore(key) { try { localStorage.removeItem(key); } catch (e) {} }
+function toast(msg) {
+  const t = $('toast'); t.textContent = msg; t.hidden = false;
+  clearTimeout(toast._t); toast._t = setTimeout(() => (t.hidden = true), 1800);
+}
+
+/* ============================================================
+   Ses, titreşim, ekranı açık tutma
+   ============================================================ */
+const prefs = Object.assign({ sound: true, vib: true }, store('antrenman.prefs') || {});
+let ac = null;
+function audio() {
+  if (!ac) { const C = window.AudioContext || window.webkitAudioContext; if (C) ac = new C(); }
+  if (ac && ac.state === 'suspended') ac.resume();
+  return ac;
+}
+function tone(freq, dur, when = 0, vol = 0.35) {
+  const a = audio(); if (!a) return;
+  const t = a.currentTime + when;
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t + 0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g); g.connect(a.destination);
+  o.start(t); o.stop(t + dur + 0.05);
+}
+function tick321() { if (prefs.sound) tone(880, 0.12); if (prefs.vib && navigator.vibrate) navigator.vibrate(60); }
+function alarm() {
+  if (prefs.sound) { tone(988, 0.18, 0); tone(988, 0.18, 0.25); tone(1319, 0.5, 0.5); }
+  if (prefs.vib && navigator.vibrate) navigator.vibrate([250, 100, 250, 100, 450]);
+}
+let wakeLock = null;
+async function keepAwake() {
+  try { if ('wakeLock' in navigator && !wakeLock) { wakeLock = await navigator.wakeLock.request('screen'); wakeLock.addEventListener('release', () => (wakeLock = null)); } } catch (e) {}
+}
+function releaseAwake() { try { wakeLock && wakeLock.release(); } catch (e) {} wakeLock = null; }
+
+/* ============================================================
+   Oturum durumu
+   ============================================================ */
+let S = null;       // { dayId, idx, startAt, endAt, done:[], skipped:[] }
+let steps = [];
+let timer = null;   // { kind:'work'|'rest', endAt, left, running, lastSec }
+const SAVE_KEY = 'antrenman.oturum';
+
+function dayById(id) { return PROGRAM.find((d) => d.id === id); }
+function save() { if (S && !S.endAt) store(SAVE_KEY, { ...S, savedAt: Date.now() }); }
+
+function show(screenId) {
+  document.querySelectorAll('.screen').forEach((s) => s.classList.toggle('active', s.id === screenId));
+  window.scrollTo(0, 0);
+}
+
+function startDay(id, resumeState) {
+  audio();
+  const day = dayById(id);
+  steps = buildSteps(day);
+  S = resumeState || { dayId: id, idx: 0, startAt: Date.now(), done: [], skipped: [], ratings: {} };
+  S.ratings = S.ratings || {};
+  S.idx = Math.min(S.idx, steps.length - 1);
+  keepAwake();
+  show('scrWorkout');
+  showStep();
+}
+
+function mark(idx, list) {
+  S.done = S.done.filter((i) => i !== idx);
+  S.skipped = S.skipped.filter((i) => i !== idx);
+  if (list) S[list].push(idx);
+}
+
+function showStep() {
+  timer = null;
+  const st = steps[S.idx];
+  $('exPanel').hidden = false; $('restPanel').hidden = true;
+  $('counter').textContent = `Hareket ${S.idx + 1} / ${steps.length}`;
+  $('bar').style.width = `${(S.idx / steps.length) * 100}%`;
+  $('exBlock').textContent = st.block;
+  $('exRound').textContent = st.rounds > 1 ? `Set ${st.round} / ${st.rounds}` : 'Tek set';
+  $('exName').textContent = st.n;
+  const v = $('exValue'); v.textContent = valueText(st); v.className = 'exvalue';
+  $('exSets').textContent = setsText(st);
+  const yt = $('exYt');
+  yt.textContent = st.vid ? '▶ Anlamadıysan videoyu izle' : "▶ Anlamadıysan YouTube'da ara";
+  $('exDesc').textContent = st.d;
+  $('exYt').href = ytUrl(st);
+  closeViewer();
+  renderPics($('exPics'), st, true);
+  const isTime = st.t === 'time';
+  $('btnStart').hidden = !isTime;
+  $('btnStart').textContent = 'Başla';
+  $('btnStart').classList.remove('pause');
+  $('btnPrev').disabled = S.idx === 0;
+  $('btnPrev').style.opacity = S.idx === 0 ? 0.4 : 1;
+  paintRate('exRate', S.idx);
+  save();
+  if (isTime && st.auto) startWork();
+}
+
+/* ============================================================
+   Çizimler: küçük kareler ve büyütme penceresi
+   ============================================================ */
+function ytUrl(st) {
+  return st.vid ? `https://www.youtube.com/watch?v=${st.vid}` : 'https://www.youtube.com/results?search_query=' + encodeURIComponent(st.q || st.n);
+}
+function setsText(st) { return `${st.rounds} set × ${valueText(st)}${st.sides ? ' (her taraf)' : ''}`; }
+
+function showVideo(on) {
+  const box = $('vVideo'), st = steps[S.idx];
+  box.textContent = '';
+  box.hidden = !on;
+  $('picDlg').querySelector('.viewer').classList.toggle('vid', on);
+  if (V) V.play = !on;
+  if (on) {
+    const f = document.createElement('iframe');
+    f.src = `https://www.youtube-nocookie.com/embed/${st.vid}?rel=0&playsinline=1&autoplay=1`;
+    f.title = st.n + ' videosu';
+    f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+    f.allowFullscreen = true;
+    f.referrerPolicy = 'strict-origin-when-cross-origin';
+    box.appendChild(f);
+  }
+  $('vYt').textContent = on ? '◀ Resimlere dön' : '▶ Videoyu burada izle';
+  if (V) paintViewer();
+}
+
+function renderPics(box, st, clickable) {
+  box.textContent = '';
+  const fr = FIG.frames(st.img);
+  box.hidden = !fr;
+  if (!fr) return;
+  box.style.setProperty('--n', fr.length);
+  fr.forEach((x, i) => {
+    const el = document.createElement(clickable ? 'button' : 'div');
+    el.className = 'pic';
+    el.innerHTML = x.svg; // kendi ürettiğimiz SVG
+    if (clickable) {
+      const cap = document.createElement('span'); cap.textContent = `${i + 1}. ${x.cap}`; el.appendChild(cap);
+      el.setAttribute('aria-label', `${i + 1}. kare: ${x.cap} — büyüt`);
+      el.addEventListener('click', () => openViewer(i));
+    }
+    box.appendChild(el);
+  });
+}
+
+let V = null;
+function openViewer(start, video) {
+  const st = steps[S.idx], fr = FIG.frames(st.img);
+  if (!fr) return;
+  closeViewer();
+  V = { fr, i: start || 0, play: true };
+  $('vName').textContent = st.n;
+  $('vDesc').textContent = st.d;
+  $('vYt').href = ytUrl(st);
+  const dots = $('vDots'); dots.textContent = '';
+  fr.forEach(() => dots.appendChild(document.createElement('i')));
+  paintViewer();
+  if (CAN_EMBED && st.vid) showVideo(!!video);
+  else $('vYt').textContent = st.vid ? "▶ Videoyu YouTube'da aç" : "▶ YouTube'da ara";
+  $('picDlg').hidden = false;
+  V.tm = setInterval(() => { if (V && V.play) { V.i = (V.i + 1) % V.fr.length; paintViewer(); } }, 1400);
+}
+function paintViewer() {
+  $('vStage').innerHTML = V.fr[V.i].svg;
+  $('vCap').textContent = `${V.i + 1}. ${V.fr[V.i].cap}`;
+  $('vPlay').textContent = V.play ? 'Duraklat' : 'Oynat';
+  [...$('vDots').children].forEach((d, i) => d.classList.toggle('on', i === V.i));
+}
+function stepViewer(d) { if (!V) return; V.play = false; V.i = (V.i + d + V.fr.length) % V.fr.length; paintViewer(); }
+function closeViewer() {
+  if (V) clearInterval(V.tm);
+  V = null;
+  $('vVideo').textContent = ''; // oynatmayı durdurur
+  $('vVideo').hidden = true;
+  $('picDlg').querySelector('.viewer').classList.remove('vid');
+  $('picDlg').hidden = true;
+}
+
+/* ============================================================
+   Günün planı: başlamadan önce set ve tekrarlar
+   ============================================================ */
+let pendingDay = null;
+function itemDose(blk, it) {
+  const dose = it.t === 'time' ? (it.v >= 60 ? fmtClock(it.v) : `${it.v} sn`) : it.v;
+  return `${blk.rounds || 1} set × ${dose}${it.sides ? ' (her taraf)' : ''}`;
+}
+function blockNote(blk) {
+  const r = blk.rounds || 1;
+  if (r < 2) return '';
+  if (blk.items.length > 1) return `Devre: hareketleri sırayla birer set yap, sonra başa dön (${r} tur). Hareket arası ${blk.rest} sn, tur arası ${blk.roundRest ?? blk.rest} sn dinlen.`;
+  return blk.rest ? `Set arası ${blk.rest} sn dinlen.` : 'Setler arka arkaya, sayaç kendiliğinden ilerler.';
+}
+function showDay(id) {
+  const day = dayById(id), st = buildSteps(day);
+  pendingDay = id;
+  $('dayTitle').textContent = `${day.title} · ${day.name}`;
+  $('dayMeta').textContent = `${st.length} adım · ≈ ${estimateMin(st)} dk`;
+  const box = $('dayPlan'); box.textContent = '';
+  day.blocks.forEach((blk) => {
+    const el = document.createElement('div'); el.className = 'pblock';
+    const h = document.createElement('h3'); h.textContent = blk.b; el.appendChild(h);
+    const note = blockNote(blk);
+    if (note) { const p = document.createElement('p'); p.className = 'pnote'; p.textContent = note; el.appendChild(p); }
+    blk.items.forEach((it) => {
+      const row = document.createElement('div'); row.className = 'prow';
+      const b = document.createElement('b'); b.textContent = it.n;
+      const s = document.createElement('span'); s.textContent = itemDose(blk, it);
+      row.append(b, s); el.appendChild(row);
+    });
+    box.appendChild(el);
+  });
+  show('scrDay');
+}
+
+function startWork() {
+  const st = steps[S.idx];
+  timer = { kind: 'work', endAt: Date.now() + st.v * 1000, running: true, lastSec: null };
+  $('btnStart').textContent = 'Duraklat';
+  $('btnStart').classList.add('pause');
+  $('exValue').className = 'exvalue running';
+  tickNow();
+}
+
+function toggleWork() {
+  if (!timer) return startWork();
+  if (timer.running) {
+    timer.left = timer.endAt - Date.now(); timer.running = false;
+    $('btnStart').textContent = 'Devam'; $('btnStart').classList.remove('pause');
+    $('exValue').className = 'exvalue paused';
+  } else {
+    timer.endAt = Date.now() + timer.left; timer.running = true;
+    $('btnStart').textContent = 'Duraklat'; $('btnStart').classList.add('pause');
+    $('exValue').className = 'exvalue running';
+  }
+}
+
+function completeStep(skipped) {
+  mark(S.idx, skipped ? 'skipped' : 'done');
+  const st = steps[S.idx];
+  if (S.idx >= steps.length - 1) return finish();
+  if (st.rest > 0) startRest(st.rest);
+  else { S.idx++; showStep(); }
+}
+
+function startRest(sec) {
+  const nx = steps[S.idx + 1];
+  $('exPanel').hidden = true; $('restPanel').hidden = false;
+  $('nextName').textContent = nx.n;
+  $('nextValue').textContent = valueText(nx) + (nx.rounds > 1 ? ` · Set ${nx.round}/${nx.rounds}` : '');
+  $('bar').style.width = `${((S.idx + 1) / steps.length) * 100}%`;
+  renderPics($('nextPics'), nx, false);
+  $('restRateName').textContent = '(' + steps[S.idx].n + ')';
+  paintRate('restRate', S.idx);
+  timer = { kind: 'rest', endAt: Date.now() + sec * 1000, running: true, lastSec: null };
+  save();
+  tickNow();
+}
+
+function endRest(withAlarm) {
+  if (withAlarm) alarm();
+  S.idx++;
+  showStep();
+}
+
+function tickNow() {
+  if (S && !S.endAt) $('elapsed').textContent = fmtClock((Date.now() - S.startAt) / 1000);
+  if (!timer || !timer.running) return;
+  const left = timer.endAt - Date.now();
+  const sec = Math.ceil(left / 1000);
+  if (sec !== timer.lastSec) {
+    const first = timer.lastSec === null;
+    timer.lastSec = sec;
+    if (!first && sec > 0 && sec <= 3) tick321();
+    if (timer.kind === 'rest') {
+      $('restNum').textContent = fmtClock(sec);
+      $('restNum').classList.toggle('last', sec <= 3);
+    } else {
+      $('exValue').textContent = fmtClock(sec);
+    }
+  }
+  if (left <= 0) {
+    const kind = timer.kind;
+    timer.running = false;
+    if (kind === 'rest') endRest(true);
+    else { alarm(); completeStep(false); }
+  }
+}
+setInterval(tickNow, 200);
+
+function finish() {
+  timer = null;
+  closeViewer();
+  S.endAt = Date.now();
+  unstore(SAVE_KEY);
+  releaseAwake();
+  const day = dayById(S.dayId);
+  $('finDay').textContent = `${day.title} · ${day.name}`;
+  $('finTotal').textContent = fmtClock((S.endAt - S.startAt) / 1000);
+  const notDone = steps.length - S.done.length;
+  $('finStats').textContent = `${S.done.length} / ${steps.length} hareket tamamlandı` + (notDone ? ` · ${notDone} atlandı/yapılmadı` : '');
+  ['inPain', 'inKcal', 'inAvg', 'inMax', 'inNote'].forEach((id) => ($(id).value = ''));
+  renderRateSummary();
+  renderSummary();
+  show('scrFinish');
+}
+
+/* ============================================================
+   Kolay / Uygun / Zor
+   ============================================================ */
+const RATE_LABEL = { kolay: 'Kolay', uygun: 'Uygun', zor: 'Zor' };
+
+function paintRate(boxId, idx) {
+  const box = $(boxId);
+  box.dataset.idx = idx;
+  box.querySelectorAll('.rbtn').forEach((b) => b.classList.toggle('on', S.ratings[idx] === b.dataset.v));
+}
+
+// Her hareketi (sol/sağ ve turlar birleşik) baskın puanına göre gruplar
+function rateGroups() {
+  const map = new Map();
+  steps.forEach((st, i) => {
+    const base = st.n.replace(/ · (sol|sağ)$/, '');
+    if (!map.has(base)) map.set(base, { name: base, dose: valueText(st), kolay: 0, uygun: 0, zor: 0 });
+    const r = S.ratings[i];
+    if (r) map.get(base)[r]++;
+  });
+  const groups = { zor: [], uygun: [], kolay: [], yok: [] };
+  map.forEach((e) => {
+    const total = e.kolay + e.uygun + e.zor;
+    if (!total) return groups.yok.push(e);
+    // eşitlikte daha zor olan kazanır
+    const top = ['zor', 'uygun', 'kolay'].reduce((a, b) => (e[b] > e[a] ? b : a), 'zor');
+    groups[top].push(e);
+  });
+  return groups;
+}
+
+function rateDetail(e) {
+  const parts = ['kolay', 'uygun', 'zor'].filter((k) => e[k]).map((k) => `${RATE_LABEL[k]} ${e[k]}`);
+  return `${e.name} — ${e.dose}` + (parts.length ? ` (${parts.join(', ')})` : '');
+}
+
+function renderRateSummary() {
+  const g = rateGroups();
+  const box = $('finRate'); box.textContent = '';
+  [['zor', 'Zor'], ['uygun', 'Uygun'], ['kolay', 'Kolay'], ['yok', 'Puanlanmadı']].forEach(([k, label]) => {
+    if (!g[k].length) return;
+    const row = document.createElement('div'); row.className = 'rs ' + k;
+    const b = document.createElement('b'); b.textContent = `${label} (${g[k].length})`;
+    const d = document.createElement('div'); d.textContent = g[k].map((e) => e.name).join(', ');
+    row.append(b, d); box.appendChild(row);
+  });
+}
+
+function renderSummary() {
+  const day = dayById(S.dayId);
+  const d = new Date(S.startAt);
+  const gun = d.toLocaleDateString('tr-TR', { weekday: 'long' });
+  const date = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} (${gun})`;
+  const missed = [...new Set(steps.map((st, i) => (S.done.includes(i) ? null : st.n.replace(/ · (sol|sağ)$/, ''))).filter(Boolean))];
+  const val = (id) => $(id).value.trim();
+  const lines = [
+    `### ${date} — ${day.title}: ${day.name}`,
+    `- Süre: ${fmtDur(S.endAt - S.startAt)} (başlangıç ${pad(d.getHours())}:${pad(d.getMinutes())})`,
+    `- Tamamlanan: ${S.done.length}/${steps.length} hareket`,
+  ];
+  if (missed.length) lines.push(`- Atlanan/yapılmayan: ${missed.join(', ')}`);
+  lines.push(`- Ağrı (0-10): ${val('inPain') || '-'}`);
+  lines.push(`- Nabız ort./maks.: ${val('inAvg') || '-'} / ${val('inMax') || '-'}`);
+  lines.push(`- Kalori: ${val('inKcal') || '-'}`);
+  if (val('inNote')) lines.push(`- Not: ${val('inNote')}`);
+  const g = rateGroups();
+  lines.push('- Zorluk (Kolay/Uygun/Zor):');
+  [['zor', 'Zor'], ['uygun', 'Uygun'], ['kolay', 'Kolay']].forEach(([k, label]) => {
+    if (g[k].length) lines.push(`  - ${label}: ${g[k].map(rateDetail).join('; ')}`);
+  });
+  if (g.yok.length) lines.push(`  - Puanlanmadı: ${g.yok.map((e) => e.name).join(', ')}`);
+  $('summary').value = lines.join('\n');
+}
+
+async function copySummary() {
+  const text = $('summary').value;
+  try { await navigator.clipboard.writeText(text); toast('Kopyalandı ✓'); return; } catch (e) {}
+  const ta = $('summary'); ta.removeAttribute('readonly'); ta.select(); ta.setSelectionRange(0, text.length);
+  let ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+  ta.setAttribute('readonly', ''); window.getSelection().removeAllRanges();
+  toast(ok ? 'Kopyalandı ✓' : 'Metni basılı tutup kopyala');
+}
+
+/* ============================================================
+   Gün seçimi ekranı
+   ============================================================ */
+function card(numText, nameText, metaText, extraClass, onClick) {
+  const b = document.createElement('button');
+  b.className = 'daycard' + (extraClass ? ' ' + extraClass : '');
+  [['dnum', numText], ['dname', nameText], ['dmeta', metaText]].forEach(([c, t]) => {
+    const el = document.createElement('div'); el.className = c; el.textContent = t; b.appendChild(el);
+  });
+  b.addEventListener('click', onClick);
+  return b;
+}
+
+function renderSelect() {
+  const list = $('dayList'); list.textContent = '';
+  PROGRAM.forEach((day) => {
+    const st = buildSteps(day);
+    list.appendChild(card(day.title, day.name, `${st.length} adım · ≈ ${estimateMin(st)} dk · planı gör`, '', () => showDay(day.id)));
+  });
+  const box = $('resumeBox'); box.textContent = '';
+  const saved = store(SAVE_KEY);
+  if (saved && dayById(saved.dayId) && Date.now() - saved.savedAt < 6 * 3600 * 1000) {
+    const day = dayById(saved.dayId);
+    const total = buildSteps(day).length;
+    box.appendChild(card('Yarım kalan antrenman', day.name, `Hareket ${saved.idx + 1} / ${total} · devam etmek için dokun`, 'resume', () => startDay(saved.dayId, saved)));
+  }
+  $('tglSound').classList.toggle('off', !prefs.sound);
+  $('tglVib').classList.toggle('off', !prefs.vib);
+}
+
+/* ============================================================
+   Butonlar
+   ============================================================ */
+$('btnStart').addEventListener('click', () => { audio(); toggleWork(); });
+$('btnDone').addEventListener('click', () => { audio(); completeStep(false); });
+$('btnSkipEx').addEventListener('click', () => completeStep(true));
+$('btnPrev').addEventListener('click', () => { if (S.idx > 0) { S.idx--; mark(S.idx, null); showStep(); } });
+$('btnAdd10').addEventListener('click', () => { if (timer && timer.kind === 'rest') { timer.endAt += 10000; timer.lastSec = null; tickNow(); } });
+$('btnSkipRest').addEventListener('click', () => { if (timer && timer.kind === 'rest') endRest(false); });
+$('btnExit').addEventListener('click', () => { $('exitDlg').hidden = false; });
+$('btnExitNo').addEventListener('click', () => { $('exitDlg').hidden = true; });
+$('vClose').addEventListener('click', closeViewer);
+$('btnDayBack').addEventListener('click', () => show('scrSelect'));
+$('btnDayStart').addEventListener('click', () => { if (pendingDay) startDay(pendingDay); });
+$('exYt').addEventListener('click', (e) => {
+  const st = steps[S.idx];
+  if (CAN_EMBED && st.vid) { e.preventDefault(); openViewer(0, true); }
+});
+$('vYt').addEventListener('click', (e) => {
+  const st = steps[S.idx];
+  if (CAN_EMBED && st.vid) { e.preventDefault(); showVideo($('vVideo').hidden); }
+});
+$('vPrev').addEventListener('click', () => stepViewer(-1));
+$('vNext').addEventListener('click', () => stepViewer(1));
+$('vPlay').addEventListener('click', () => { if (V) { V.play = !V.play; paintViewer(); } });
+$('vStage').addEventListener('click', () => stepViewer(1));
+$('picDlg').addEventListener('click', (e) => { if (e.target.id === 'picDlg') closeViewer(); });
+$('btnExitYes').addEventListener('click', () => { $('exitDlg').hidden = true; finish(); });
+document.querySelectorAll('.rate').forEach((box) => box.addEventListener('click', (e) => {
+  const b = e.target.closest('.rbtn'); if (!b || !S) return;
+  const i = Number(box.dataset.idx);
+  if (S.ratings[i] === b.dataset.v) delete S.ratings[i]; else S.ratings[i] = b.dataset.v;
+  paintRate(box.id, i);
+  save();
+}));
+['inPain', 'inKcal', 'inAvg', 'inMax', 'inNote'].forEach((id) => $(id).addEventListener('input', renderSummary));
+$('btnCopy').addEventListener('click', copySummary);
+$('btnShare').addEventListener('click', async () => {
+  if (navigator.share) {
+    try { await navigator.share({ text: $('summary').value }); return; }
+    catch (e) { if (e && e.name === 'AbortError') return; }
+  }
+  copySummary();
+});
+$('btnHome').addEventListener('click', () => { S = null; renderSelect(); show('scrSelect'); });
+$('tglSound').addEventListener('click', () => { prefs.sound = !prefs.sound; store('antrenman.prefs', prefs); renderSelect(); });
+$('tglVib').addEventListener('click', () => { prefs.vib = !prefs.vib; store('antrenman.prefs', prefs); renderSelect(); });
+$('btnTest').addEventListener('click', () => { audio(); alarm(); toast('Ses/titreşim testi'); });
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') { tickNow(); if (S && !S.endAt) keepAwake(); }
+});
+
+renderSelect();
+</script>
+</body>
+</html>
