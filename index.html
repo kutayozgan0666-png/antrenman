@@ -84,6 +84,9 @@
   .vvideo{position:relative;width:100%;max-width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:var(--bg)}
   .vvideo iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
   .viewer.vid #vStage,.viewer.vid #vDots,.viewer.vid #vCap,.viewer.vid .row{display:none}
+  .vctl{display:none;gap:8px;margin-top:8px}
+  .viewer.vid .vctl{display:flex}
+  .vctl button{flex:1;min-width:0;padding-left:6px;padding-right:6px}
 
   /* Hareket çizimleri */
   .pics{display:grid;grid-template-columns:repeat(var(--n,3),minmax(0,1fr));gap:8px;margin:0 0 10px}
@@ -331,6 +334,11 @@
   <div class="dlgbox viewer" role="dialog" aria-modal="true" aria-labelledby="vName">
     <div class="vhead"><b id="vName"></b><button id="vClose" class="icon" aria-label="Kapat">✕</button></div>
     <div id="vVideo" class="vvideo" hidden></div>
+    <div class="vctl">
+      <button id="vBack" class="small" aria-label="10 saniye geri">⏪ 10 sn</button>
+      <button id="vFwd" class="small" aria-label="10 saniye ileri">10 sn ⏩</button>
+      <button id="vRate" class="small" aria-label="Oynatma hızı">Hız 1×</button>
+    </div>
     <div id="vStage" class="vstage"></div>
     <div id="vDots" class="vdots"></div>
     <div id="vCap" class="vcap"></div>
@@ -710,21 +718,27 @@ const IMG_BY_NAME = {
   'Sabit bisiklet · ısınma': 'bike', 'Tempolu': 'bike', 'Rahat': 'bike', 'Sabit bisiklet · soğuma': 'bike',
   'Eliptik · Zone 2': 'ellip', 'Derin nefes': 'breath',
 };
-// Çizim → doğru yapılış videosu (YouTube kimliği). Hepsi gömülebilir olarak doğrulandı (2026-11-20).
+// Çizim → doğru yapılış videosu (YouTube kimliği; "@saniye" varsa video o saniyeden başlar).
+// Türkçe anlatımlı, kısa videolar tercih edildi; hepsi gömülebilir olarak doğrulandı (2026-11-25).
+// Türkçesi bulunamayanlar (İngilizce): pallof, pullApart, poolWalk.
 const VIDEO = {
-  kediDeve: 'IPEXJ4FHDXQ', pelvikTilt: 'n8DU1desCy8', clam: '4T2P_-MV9g0', sideSeries: 'S0uZzU3ipC0',
-  deadBug: 'bxn9FBrt4-A', trxRow: 'N_14s8zFOms', sinav: 'Oy1AzohemMc', oturKalk: 'YFR1MEOZNXQ',
-  bridgeBant: 'D59C72n1lyQ', bridge: 'D59C72n1lyQ', pelvicCurl: 'RC6qOEZdRU8', pallof: 'LA6Uc5yIV1c',
-  birdDog: 'LaLKNS7mxrk', yanPlank: 'UurF0EhHFLg', tekAyak: '3j0O6jRe8uY', kalcaFleksor: 'F55tzqJggAY',
-  hamstring: 'UzYGpvw1IHg', gogus: 'M850sCj9LHQ', hundred: 'hyzfkG7oKeQ', legCircle: 't7LdRat86V4',
-  singleLeg: 'TlkVjAOaKBo', spineStretch: 'LJlMdJlAcac', swimmingP: 'N-aII025loc', saw: '3j55oo1ifbQ',
-  mermaid: 'iHyv-98yaJM', freestyle: 'WLIkQoXLf5c', kick: 'ZD-h2Em_Lvs', pullBuoy: 'ITK0chbKegI',
-  backstroke: 'e6mF9DSA8CA', poolWalk: 'ZgxniVfKT4I', plank: 'Q2MbIzmkcho', pullApart: 'Zxp9IORjjK4',
-  breath: '5AFchTB2eXE', bike: 'rlOOqDgDU3U', ellip: 'RakIFxUmSpA', ellipBike: 'RakIFxUmSpA', rowEllip: 'JunqWhTXTJs',
+  kediDeve: 'xtZ7OXLCwSg', pelvikTilt: 'dqAlUyHZ2WE', clam: 'dDEkH4dZEac', sideSeries: 'jrdCQRTIVGo',
+  deadBug: 'kGyhUpnw70E', trxRow: 'ZTipP-gmFPY', sinav: 'T6Ikl8bj65s', oturKalk: 'DW8w11mNsGY',
+  bridgeBant: '47ZMn1xiJb4', bridge: '47ZMn1xiJb4', pelvicCurl: 'Mze1gET37Bk', pallof: 'LA6Uc5yIV1c',
+  birdDog: 'VSvp8iEoLC8', yanPlank: 'kwGJs6l0oAc', tekAyak: 'bwnf2Uu8SlM', kalcaFleksor: 'dHC0A4eS_6g',
+  hamstring: 'DRBdf6ky_nE', gogus: 'pJq2nEl6nMQ', hundred: 'Sj2UEqyrKiE', legCircle: 'Qzi2tpX84YQ',
+  singleLeg: '7tlbiMeaDwE', spineStretch: 'KF-fwJlE6us', swimmingP: 'ijVDRT85vxc', saw: 'c6HC0cp9YVk',
+  mermaid: 'eUdswZX-bhA', freestyle: '7BwMxozVLtI', kick: 'e1F6Z2kwT8k', pullBuoy: 'swmQx-WRkKo',
+  backstroke: 'On4ku7y-HzI', poolWalk: 'ZgxniVfKT4I', plank: 'dp6xCq2ASAY@15', pullApart: 'Zxp9IORjjK4',
+  breath: 'uH8ZXG7SnDA', bike: 'UEObYIDGW4w', ellip: 'MfqzzyjpRPw', ellipBike: 'MfqzzyjpRPw', rowEllip: 'u8X-1iyAMgY',
 };
 PROGRAM.forEach((d) => d.blocks.forEach((b) => b.items.forEach((it) => {
   if (!it.img) it.img = IMG_BY_NAME[it.n];
-  if (!it.vid) it.vid = VIDEO[it.img];
+  if (!it.vid && VIDEO[it.img]) {
+    const [id, s] = VIDEO[it.img].split('@');
+    it.vid = id;
+    it.vs = +s || 0;
+  }
 })));
 // Gömülü oynatıcı yalnızca normal bir web adresinde çalışır (Claude bağlantısında ve yerel dosyada çalışmaz)
 const CAN_EMBED = /\.github\.io$/.test(location.hostname) || ['localhost', '127.0.0.1'].includes(location.hostname);
@@ -1015,9 +1029,32 @@ function showStep() {
    Çizimler: küçük kareler ve büyütme penceresi
    ============================================================ */
 function ytUrl(st) {
-  return st.vid ? `https://www.youtube.com/watch?v=${st.vid}` : 'https://www.youtube.com/results?search_query=' + encodeURIComponent(st.q || st.n);
+  return st.vid ? `https://www.youtube.com/watch?v=${st.vid}${st.vs ? '&t=' + st.vs + 's' : ''}` :'https://www.youtube.com/results?search_query=' + encodeURIComponent(st.q || st.n);
 }
 function setsText(st) { return `${st.rounds} set × ${valueText(st)}${st.sides ? ' (her taraf)' : ''}`; }
+
+// Gömülü YouTube oynatıcısını kumanda etmek (ileri/geri sarma, hız)
+const YT = { frame: null, t: 0, rate: 1 };
+function ytSend(msg) {
+  if (YT.frame && YT.frame.contentWindow) YT.frame.contentWindow.postMessage(JSON.stringify({ ...msg, id: 1, channel: 'widget' }), '*');
+}
+function ytCmd(func, args) { ytSend({ event: 'command', func, args }); }
+window.addEventListener('message', (e) => {
+  if (!/^https:\/\/www\.youtube(-nocookie)?\.com$/.test(e.origin)) return;
+  let d;
+  try { d = typeof e.data === 'string' ? JSON.parse(e.data) : e.data; } catch (err) { return; }
+  if (d && d.info && typeof d.info.currentTime === 'number') YT.t = d.info.currentTime;
+});
+function ytSeek(delta) {
+  YT.t = Math.max(0, YT.t + delta);
+  ytCmd('seekTo', [YT.t, true]);
+}
+function ytRate() {
+  const rates = [1, 1.25, 1.5, 2];
+  YT.rate = rates[(rates.indexOf(YT.rate) + 1) % rates.length];
+  ytCmd('setPlaybackRate', [YT.rate]);
+  $('vRate').textContent = `Hız ${String(YT.rate).replace('.', ',')}×`;
+}
 
 function showVideo(on) {
   const box = $('vVideo'), st = steps[S.idx];
@@ -1025,9 +1062,18 @@ function showVideo(on) {
   box.hidden = !on;
   $('picDlg').querySelector('.viewer').classList.toggle('vid', on);
   if (V) V.play = !on;
+  YT.t = st.vs || 0;
+  YT.frame = null;
+  $('vRate').textContent = `Hız ${String(YT.rate).replace('.', ',')}×`;
   if (on) {
     const f = document.createElement('iframe');
-    f.src = `https://www.youtube-nocookie.com/embed/${st.vid}?rel=0&playsinline=1&autoplay=1`;
+    f.src = `https://www.youtube-nocookie.com/embed/${st.vid}?rel=0&playsinline=1&autoplay=1&hl=tr&enablejsapi=1`
+      + `&origin=${encodeURIComponent(location.origin)}${st.vs ? '&start=' + st.vs : ''}`;
+    f.addEventListener('load', () => {
+      YT.frame = f;
+      ytSend({ event: 'listening' });
+      if (YT.rate !== 1) setTimeout(() => ytCmd('setPlaybackRate', [YT.rate]), 800);
+    });
     f.title = st.n + ' videosu';
     f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
     f.allowFullscreen = true;
@@ -1349,6 +1395,9 @@ $('exYt').addEventListener('click', (e) => {
   const st = steps[S.idx];
   if (CAN_EMBED && st.vid) { e.preventDefault(); openViewer(0, true); }
 });
+$('vBack').addEventListener('click', () => ytSeek(-10));
+$('vFwd').addEventListener('click', () => ytSeek(10));
+$('vRate').addEventListener('click', ytRate);
 $('vYt').addEventListener('click', (e) => {
   const st = steps[S.idx];
   if (CAN_EMBED && st.vid) { e.preventDefault(); showVideo($('vVideo').hidden); }
